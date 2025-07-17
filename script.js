@@ -70,68 +70,152 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // --- 语音识别核心 ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
+    // 替换为MediaRecorder+SiliconFlow API
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
 
-    // 检查浏览器是否支持语音识别
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.continuous = true; // 持续识别
-        recognition.lang = 'zh-CN'; // 设置语言为中文
-        recognition.interimResults = true; // 获取临时结果
+    // --- Token 输入框逻辑 ---
+    const tokenInputContainer = document.getElementById('token-input-container');
+    const tokenInput = document.getElementById('token-input');
+    const saveTokenBtn = document.getElementById('save-token-btn');
+    let userToken = localStorage.getItem('sf_token') || '';
+    if (userToken) tokenInput.value = userToken;
 
-        recognition.onresult = (event) => {
-            const transcriptContainer = document.getElementById('transcript');
-            let final_transcript = '';
-            let interim_transcript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    final_transcript += event.results[i][0].transcript;
-                } else {
-                    interim_transcript += event.results[i][0].transcript;
-                }
-            }
-            
-            // 显示最终识别结果
-            transcriptContainer.textContent = final_transcript || interim_transcript;
-            
-            // 基于关键词的情感分析和视频切换
-            if (final_transcript) {
-                analyzeAndReact(final_transcript);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            console.error('语音识别错误:', event.error);
-        };
-
-    } else {
-        console.log('您的浏览器不支持语音识别功能。');
-        // 可以在界面上给用户提示
-    }
-
-    // --- 麦克风按钮交互 ---
-    let isListening = false;
-
-    micButton.addEventListener('click', function() {
-        if (!SpeechRecognition) return; // 如果不支持，则不执行任何操作
-
-        isListening = !isListening;
-        micButton.classList.toggle('is-listening', isListening);
-        const transcriptContainer = document.querySelector('.transcript-container');
-        const transcriptText = document.getElementById('transcript');
-
-        if (isListening) {
-            transcriptText.textContent = '聆听中...'; // 立刻显示提示
-            transcriptContainer.classList.add('visible');
-            recognition.start();
-        } else {
-            recognition.stop();
-            transcriptContainer.classList.remove('visible');
-            transcriptText.textContent = ''; // 清空文本
+    saveTokenBtn.addEventListener('click', function() {
+        userToken = tokenInput.value.trim();
+        if (userToken) {
+            localStorage.setItem('sf_token', userToken);
+            tokenInputContainer.style.display = 'none';
         }
     });
+
+    // --- 长按麦克风按钮才触发录音/弹token输入框 ---
+    let micPressTimer = null;
+    const LONG_PRESS_DURATION = 300; // ms
+    let longPressTriggered = false;
+
+    function addMicButtonEvents() {
+        micButton.addEventListener('mousedown', (e) => {
+            longPressTriggered = false;
+            micPressTimer = setTimeout(() => {
+                longPressTriggered = true;
+                if (!userToken) {
+                    tokenInputContainer.style.display = 'block';
+                    tokenInput.focus();
+                } else {
+                    startRecording(e);
+                }
+            }, LONG_PRESS_DURATION);
+        });
+        micButton.addEventListener('touchstart', (e) => {
+            longPressTriggered = false;
+            micPressTimer = setTimeout(() => {
+                longPressTriggered = true;
+                if (!userToken) {
+                    tokenInputContainer.style.display = 'block';
+                    tokenInput.focus();
+                } else {
+                    startRecording(e);
+                }
+            }, LONG_PRESS_DURATION);
+        });
+        function cancelPress(e) {
+            clearTimeout(micPressTimer);
+            if (longPressTriggered) {
+                stopRecording(e);
+            }
+        }
+        micButton.addEventListener('mouseup', cancelPress);
+        micButton.addEventListener('mouseleave', cancelPress);
+        micButton.addEventListener('touchend', cancelPress);
+    }
+
+    addMicButtonEvents();
+
+    async function startRecording(e) {
+        if (isRecording) return;
+        isRecording = true;
+        micButton.classList.add('is-listening');
+        document.querySelector('.transcript-container').classList.add('visible');
+        document.getElementById('transcript').textContent = '聆听中...';
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('当前浏览器不支持音频录制');
+            return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.start();
+    }
+
+    function stopRecording(e) {
+        if (!isRecording) return;
+        isRecording = false;
+        micButton.classList.remove('is-listening');
+        // 不要立即隐藏transcript和清空内容，让识别结果有机会显示
+        // document.querySelector('.transcript-container').classList.remove('visible');
+        // document.getElementById('transcript').textContent = '';
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                await sendToSiliconFlow(audioBlob);
+            };
+        }
+    }
+
+    async function sendToSiliconFlow(audioBlob) {
+        const transcriptContainer = document.getElementById('transcript');
+        transcriptContainer.textContent = '识别中...';
+        document.querySelector('.transcript-container').classList.add('visible');
+
+        const form = new FormData();
+        form.append("model", "FunAudioLLM/SenseVoiceSmall");
+        form.append("file", audioBlob, "audio.webm");
+
+        const options = {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + (userToken || '') },
+            body: form
+        };
+
+        try {
+            const response = await fetch('https://api.siliconflow.cn/v1/audio/transcriptions', options);
+            const data = await response.json();
+            if (data.text) {
+                transcriptContainer.textContent = data.text;
+                document.querySelector('.transcript-container').classList.add('visible');
+                analyzeAndReact(data.text);
+                // setTimeout(() => {
+                //     document.querySelector('.transcript-container').classList.remove('visible');
+                //     transcriptContainer.textContent = '';
+                // }, 3000);
+            } else {
+                transcriptContainer.textContent = '识别失败';
+                setTimeout(() => {
+                    document.querySelector('.transcript-container').classList.remove('visible');
+                    transcriptContainer.textContent = '';
+                }, 2000);
+            }
+        } catch (err) {
+            transcriptContainer.textContent = '识别出错';
+            setTimeout(() => {
+                document.querySelector('.transcript-container').classList.remove('visible');
+                transcriptContainer.textContent = '';
+            }, 2000);
+            console.error(err);
+        }
+    }
 
 
     // --- 情感分析与反应 ---

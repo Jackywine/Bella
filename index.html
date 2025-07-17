@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Assistant</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
     <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -12,13 +12,13 @@
 
     <!-- 加载屏幕 -->
     <div id="loading-screen">
-        <img src="Bellaicon/Generated image.webp" alt="Loading Bella...">
+        <img src="./Bellaicon/Generated image.webp" alt="Loading Bella...">
     </div>
 
     <!-- 视频背景 -->
     <div class="video-container">
         <video autoplay muted class="bg-video active" id="video1">
-            <source src="视频资源/3D 建模图片制作.mp4" type="video/mp4">
+            <source src="./视频资源/3D 建模图片制作.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
         <video muted class="bg-video" id="video2">
@@ -51,10 +51,15 @@
             <a href="https://x.com/jackywine" target="_blank" rel="noopener noreferrer" class="footer-credit">
                 @jackywine
             </a>
+            <!-- Token 输入框，初始隐藏 -->
+            <div id="token-input-container" style="display:none; margin-top:10px;">
+                <input type="text" id="token-input" placeholder="输入API Token" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc; width:220px;">
+                <button id="save-token-btn" style="padding:4px 12px; border-radius:4px; margin-left:6px;">保存</button>
+            </div>
         </footer>
 
     </div>
 
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
 </body>
 </html>
