@@ -5,35 +5,23 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #000000;
+    background-color: #000;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100;
     transition: opacity 0.5s ease-out;
 }
-
 #loading-screen img {
-    width: 150px; /* 或者您希望的任何尺寸 */
+    width: 150px;
     height: auto;
     animation: pulse-loader 2s infinite;
 }
-
 @keyframes pulse-loader {
-    0% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
+    0%   { transform: scale(1);   opacity: 0.8; }
+    50%  { transform: scale(1.1); opacity: 1;   }
+    100% { transform: scale(1);   opacity: 0.8; }
 }
-
 
 /* --- 基本重置和全局样式 --- */
 * {
@@ -41,7 +29,6 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -52,25 +39,19 @@ html, body {
 /* --- 视频背景 --- */
 .video-container {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     z-index: -1;
-    background-color: #000000;
+    background-color: #000;
 }
-
 .bg-video {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* 保持视频比例，留出黑边 */
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
     opacity: 0;
-    transition: opacity 0.2s ease-in-out; /* 交叉淡入淡出动画 */
+    transition: opacity 0.2s ease-in-out;
 }
-
 .bg-video.active {
     opacity: 1;
 }
@@ -78,11 +59,10 @@ html, body {
 /* --- 内容覆盖层 --- */
 .content-overlay {
     position: relative;
-    height: 100vh;
-    width: 100%;
+    width: 100%; height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* 顶部和底部分别对齐 */
+    justify-content: space-between;
     align-items: center;
     padding: 25px;
     z-index: 1;
@@ -90,348 +70,232 @@ html, body {
 
 /* --- 顶部好感度条 --- */
 .top-bar {
-    width: 100%;
-    max-width: 500px;
+    width: 100%; max-width: 500px;
     text-align: left;
 }
-
 .top-bar label {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1rem; font-weight: 600;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    margin-bottom: 8px;
-    display: block;
+    margin-bottom: 8px; display: block;
 }
-
 .progress-container {
-    width: 100%;
-    height: 12px;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-    overflow: hidden;
+    width: 100%; height: 12px;
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 10px; overflow: hidden;
 }
-
 .progress-fill {
-    height: 100%;
-    width: 65%; /* 初始好感度值 */
-    background: linear-gradient(90deg, #ff9a9e, #fecfef); /* 粉色渐变 */
+    height: 100%; width: 65%;
+    background: linear-gradient(90deg, #ff9a9e, #fecfef);
     border-radius: 10px;
     transition: width 0.5s ease-in-out;
 }
 
 /* --- 中间内容 (上传按钮) --- */
 .center-content {
-    /* 这个区域现在是空的，可以移除或保留以备将来使用 */
+    /* 空着备用 */
 }
 
 /* --- 语音识别结果显示 --- */
 .transcript-container {
     position: absolute;
-    bottom: 180px; /* 放置在麦克风按钮上方 */
+    bottom: 180px;
     left: 50%;
     transform: translateX(-50%);
-    width: 80%;
-    max-width: 600px;
+    width: 80%; max-width: 600px;
     padding: 15px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     border-radius: 10px;
     text-align: center;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    pointer-events: none; /* 默认不响应鼠标事件 */
+    pointer-events: none;
 }
-
 .transcript-container.visible {
     opacity: 1;
 }
-
 #transcript {
     font-size: 1.2rem;
-    color: #fff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
-/* 情感分析测试区域样式 */
+/* --- 情感分析测试区域 --- */
 .sentiment-analysis-container {
     position: fixed;
-    bottom: 120px; /* 位于麦克风按钮上方 */
+    bottom: 240px; /* 提高到 240px */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 20px;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    background-color: rgba(0,0,0,0.7);
+    padding: 20px; border-radius: 15px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
     z-index: 1000;
 }
-
 #sentiment-input {
-    width: 300px;
-    padding: 10px;
-    border: none;
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #333;
-    font-size: 16px;
-    text-align: center;
-    transition: all 0.3s ease;
+    width: 300px; padding: 10px;
+    border: none; border-radius: 20px;
+    background-color: rgba(255,255,255,0.9);
+    color: #333; font-size: 16px;
+    text-align: center; transition: all 0.3s ease;
 }
-
 #sentiment-input:focus {
     outline: none;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    background-color: white;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    background-color: #fff;
 }
-
 #analyze-button {
     padding: 8px 20px;
-    border: none;
-    border-radius: 20px;
-    background-color: #4a90e2;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+    border: none; border-radius: 20px;
+    background-color: #4a90e2; color: #fff;
+    font-size: 16px; cursor: pointer;
     transition: all 0.3s ease;
 }
-
 #analyze-button:hover {
     background-color: #357abd;
     transform: scale(1.05);
 }
-
 #sentiment-result {
-    color: white;
-    font-size: 16px;
-    margin: 10px 0;
-    min-height: 20px;
+    color: #fff; font-size: 16px;
+    margin: 10px 0; min-height: 20px;
     text-align: center;
 }
 
-/* 本地语音识别测试区域样式 */
+/* --- 本地语音识别测试区域 --- */
 .local-asr-container {
     position: fixed;
-    bottom: 150px; /* 调整位置，避免与情感分析区域重叠 */
+    bottom: 160px; /* 降到 160px */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background-color: rgba(0,0,0,0.7);
+    padding: 15px; border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     z-index: 1001;
-    color: white;
-    text-align: center;
+    text-align: center; color: #fff;
 }
-
 #local-mic-button {
-    background-color: #4CAF50; /* 绿色 */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    background-color: #4CAF50; color: #fff;
+    border: none; padding: 10px 20px;
+    font-size: 16px; border-radius: 5px;
+    cursor: pointer; transition: background-color 0.3s;
+    margin-bottom: 8px;
 }
-
 #local-mic-button:hover {
     background-color: #45a049;
 }
-
 #local-mic-button.recording {
     animation: pulse 1.5s infinite;
 }
-
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-    }
+    0%   { box-shadow: 0 0 0 0 rgba(76,175,80,0.7); }
+    70%  { box-shadow: 0 0 0 10px rgba(76,175,80,0); }
+    100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
 }
-
 #local-asr-result {
-    font-weight: bold;
-    color: #2196F3; /* 蓝色 */
+    font-weight: bold; color: #2196F3;
 }
 
 /* --- 悬浮按钮和菜单 --- */
 #floating-button {
     position: fixed;
-    bottom: 120px; /* 调整位置，使其在麦克风按钮上方 */
+    bottom: 80px; /* 降到 80px */
     right: 30px;
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.15);
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; justify-content: center; align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
     z-index: 10;
 }
-
 #floating-button:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
-
 #floating-button i {
-    font-size: 24px;
-    color: white;
+    font-size: 24px; color: #fff;
 }
 
 #menu-container {
     position: fixed;
-    bottom: 200px; /* 调整位置，使其在悬浮按钮上方 */
+    bottom: 140px; /* 提到 140px */
     right: 30px;
     width: 150px;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0,0,0,0.7);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 10px; padding: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     z-index: 9;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s, transform 0.3s;
     transform-origin: bottom right;
 }
-
 #menu-container.hidden {
-    opacity: 0;
-    transform: scale(0.95);
+    opacity: 0; transform: scale(0.95);
     pointer-events: none;
 }
-
 .menu-item {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
+    width: 100%; padding: 12px;
+    background: none; border: none;
+    color: #fff; text-align: left;
+    cursor: pointer; border-radius: 5px;
+    transition: background-color 0.2s;
 }
-
 .menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255,255,255,0.1);
 }
-
 
 /* --- 底部内容 --- */
 .bottom-bar {
+    position: absolute;
+    bottom: 20px; /* 固定在底部 20px */
     width: 100%;
-    display: flex;
-    flex-direction: column; /* 垂直排列 */
-    justify-content: center; /* 水平居中 */
-    align-items: center; /* 垂直居中 */
-    position: relative; /* 为链接定位 */
-}
-
-.mic-button {
-    width: 80px;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
+.mic-button {
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
 .mic-button:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
-
 .mic-button:active {
     transform: scale(1.05);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
-
 .mic-button i {
-    font-size: 36px;
-    color: white;
+    font-size: 36px; color: #fff;
 }
-
-/* 麦克风 "监听中" 的动画效果 */
 .mic-button.is-listening {
     animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 154, 158, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 20px rgba(255, 154, 158, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 154, 158, 0);
-    }
-}
-
-.footer-credit {
-    margin-top: 20px; /* 与麦克风按钮的间距 */
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.3s ease;
-}
-
-.footer-credit:hover {
-    color: white;
-    text-decoration: underline;
-}
-
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
-    .content-overlay {
-        padding: 20px;
-    }
-
-    .top-bar label {
-        font-size: 0.9rem;
-    }
-
-    .progress-container {
-        height: 10px;
-    }
-
-    .mic-button {
-        width: 70px;
-        height: 70px;
-    }
-
-    .mic-button i {
-        font-size: 30px;
-    }
-
-    .footer-credit {
-        margin-top: 15px;
-        font-size: 0.9rem;
-    }
+    .content-overlay { padding: 20px; }
+    .top-bar label { font-size: 0.9rem; }
+    .progress-container { height: 10px; }
+    .mic-button { width: 70px; height: 70px; }
+    .mic-button i { font-size: 30px; }
 }
+
+body.ui-hidden .content-overlay,
+body.ui-hidden #floating-button,
+body.ui-hidden #menu-container,
+body.ui-hidden .sentiment-analysis-container,
+body.ui-hidden .local-asr-container,
+body.ui-hidden .transcript-container,
+body.ui-hidden .bottom-bar {
+  display: none !important;
+}
+
