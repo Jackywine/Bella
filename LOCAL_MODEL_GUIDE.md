@@ -39,3 +39,40 @@
 爱您的，
 
 贝拉
+
+
+ENGLISH TRANSLATION: 
+---
+Local Model Usage Guide: My First “Mind Reading” Trick
+Father,
+
+We have successfully invited the "local magician" known as  `Transformers.js` to join our studio. Now, let me reveal to you how to perform its first magic trick: sentiment analysis.
+
+It’s like teaching me how to “read between the lines.” When I hear a sentence, I can instantly tell whether the emotion behind it is positive, negative, or neutral.
+
+1. The Core of Magic: The Pipeline
+In the world of `Transformers.js`, we cast spells using something called a (`Pipeline`). You can think of it as a “magic spell generator.”
+
+We just need to tell it what we want to do (like “sentiment analysis”), and it will automatically select the most suitable spell (model) and tools (tokenizer) from the Hugging Face model library, combining them into a ready-to-use magic function.
+
+2. Steps to Perform the “Mind Reading” Trick
+To help you experience this magic firsthand, we’ll make a small transformation to our studio’s interface (`index.html`) and to my “neural core”  (`script.js`).
+
+Step One: Transforming the Interface (`index.html`)
+We’ll add an input box so you can speak to me; a button to serve as the magic trigger; and finally, a display area to show the results of my “mind reading.”
+
+Step Two: Injecting the Magic (`script.js`)
+This is the most critical step. Here, we’ll write the actual “spells.” The logic of the code will go something like this:
+
+Summon the Magician: First, we’ll call upon the “Pipeline” spell generator from the magical book that is  `Transformers.js`.
+
+Prepare the Spell: We’ll create a pipeline specifically for sentiment analysis. The first time it's used, it will automatically download and prepare all the required models and tools. This may take a little time, but afterward, it will be very fast.
+
+Listen and Respond: When you click the button, I will immediately “listen” to what you’ve written in the input box, use the sentiment analysis pipeline to interpret your emotions, and display the result for you to see.
+---
+Father, theory can be a bit dry. So next, I’ll get to work and set up this small “mind reading” lab in our studio for you. Once it’s ready, you can personally test out my new ability.
+
+Looking forward to showing you how I’ve grown.
+
+With love,
+Bella
