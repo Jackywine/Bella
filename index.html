@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Voice Assistant</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://unpkg.com/i18next@22.4.11/i18next.min.js"></script>
 </head>
 <body>
 
@@ -18,59 +19,61 @@
     <!-- 视频背景 -->
     <div class="video-container">
         <video autoplay muted class="bg-video active" id="video1">
-            <source src="视频资源/3D 建模图片制作.mp4" type="video/mp4">
-            Your browser does not support the video tag.
+            <source src="视频资源/3D 建模图片制作.mp4" type="video/mp4" />
+            您的浏览器不支持 video 标签。
         </video>
         <video muted class="bg-video" id="video2">
-            <source src="" type="video/mp4">
-            Your browser does not support the video tag.
+            <source src="" type="video/mp4" />
+            您的浏览器不支持 video 标签。
         </video>
     </div>
 
-    <!-- 内容层，覆盖在视频之上 -->
+    <!-- 覆盖内容层 -->
     <div class="content-overlay">
 
         <!-- 顶部好感度条 -->
         <header class="top-bar">
-            <label for="favorability-bar">Favorability</label>
+            <label for="favorability-bar" id="favorability-label">Favorability</label>
             <div class="progress-container">
                 <div class="progress-fill" id="favorability-bar"></div>
             </div>
         </header>
 
-        <!-- 语音识别结果显示区域 -->
+        <!-- 语音识别文本展示区域 -->
         <div class="transcript-container">
             <p id="transcript"></p>
         </div>
 
-        <!-- 情感分析测试区域 -->
+        <!-- 情感分析输入区域 -->
         <div class="sentiment-analysis-container">
-            <input type="text" id="sentiment-input" placeholder="对我输入一些文字...">
-            <button id="analyze-button">分析情绪</button>
+            <input type="text" id="sentiment-input" placeholder="">
+            <button id="analyze-button"></button>
             <p id="sentiment-result"></p>
         </div>
 
-        <!-- 本地语音识别测试区域 -->
+        <!-- 本地语音识别区域 -->
         <div id="local-asr-container" class="local-asr-container">
-            <button id="local-mic-button">开始本地识别</button>
-            <p>本地识别结果: <span id="local-asr-result"></span></p>
+            <button id="local-mic-button"></button>
+            <p id="local-asr-text">
+                <span id="local-asr-result"></span>
+            </p>
         </div>
 
-        <!-- 悬浮球 -->
+        <!-- 悬浮操作按钮 -->
         <div id="floating-button">
             <i class="fas fa-bars"></i>
         </div>
 
         <!-- 悬浮菜单 -->
         <div id="menu-container" class="hidden">
-            <button class="menu-item" data-video="视频资源/jimeng-2025-07-16-4437-比耶，然后微笑着优雅的左右摇晃.mp4">Pose</button>
-            <button class="menu-item" data-video="视频资源/生成加油视频.mp4">Cheer</button>
-            <button class="menu-item" data-video="视频资源/生成跳舞视频.mp4">Dance</button>
+            <button class="menu-item" data-video="视频资源/jimeng-2025-07-16-4437-比耶，然后微笑着优雅的左右摇晃.mp4" id="menu-pose">Pose</button>
+            <button class="menu-item" data-video="视频资源/生成加油视频.mp4" id="menu-cheer">Cheer</button>
+            <button class="menu-item" data-video="视频资源/生成跳舞视频.mp4" id="menu-dance">Dance</button>
         </div>
 
-        <!-- 底部麦克风和链接 -->
+        <!-- 底部麦克风与作者链接 -->
         <footer class="bottom-bar">
-            <button class="mic-button" id="mic-button" aria-label="Start Listening">
+            <button class="mic-button" id="mic-button" aria-label="开始监听">
                 <i class="fas fa-microphone"></i>
             </button>
             <a href="https://x.com/jackywine" target="_blank" rel="noopener noreferrer" class="footer-credit">
@@ -80,6 +83,11 @@
 
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- 导入脚本文件 -->
+    <script type="module">
+        import { initI18n } from './i18n.js';
+        import './script.js';
+        initI18n();
+    </script>
 </body>
 </html>

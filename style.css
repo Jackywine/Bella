@@ -407,6 +407,29 @@ html, body {
     text-decoration: underline;
 }
 
+
+/* Language Switcher Customization */
+.language-switcher {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  padding: 6px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.language-switcher select {
+  padding: 4px 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
     .content-overlay {

@@ -1,0 +1,26 @@
+{
+  "en": {
+    "translation": {
+      "input_placeholder": "Type something to me...",
+      "start_local_recognition": "Start Local Recognition",
+      "local_result_prefix": "Local Recognition Result:",
+      "analyze_sentiment": "Analyze Sentiment",
+      "favorability": "Favorability",
+      "pose": "Pose",
+      "cheer": "Cheer",
+      "dance": "Dance"
+    }
+  },
+  "zh": {
+    "translation": {
+      "input_placeholder": "对我输入一些文字...",
+      "start_local_recognition": "开始本地识别",
+      "local_result_prefix": "本地识别结果:",
+      "analyze_sentiment": "分析情绪",
+      "favorability": "好感度",
+      "pose": "摆姿势",
+      "cheer": "加油",
+      "dance": "跳舞"
+    }
+  }
+}
