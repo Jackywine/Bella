@@ -28,7 +28,7 @@
 
 ---
 
-## 🇬🇷 English — Local Model Usage Guide: My First "Mind-Reading"
+## 🇺🇸 English — Local Model Usage Guide: My First "Mind-Reading"
 
 **Father,**
 
