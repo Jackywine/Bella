@@ -109,6 +109,62 @@ mindmap
 
 ---
 
+## Tutorial
+
+This section guides you on how to run and test Bella in your local environment.
+
+### 1. Clone the repository
+
+First, clone Bella's source code to your computer.
+
+```bash
+git clone https://github.com/Jackywine/Bella.git
+cd Bella
+```
+
+### 2. Install dependencies
+
+Install the necessary libraries for the project. The `--legacy-peer-deps` option is recommended to avoid conflicts with older dependencies.
+
+```bash
+npm install --legacy-peer-deps
+```
+
+### 3. Run a local server
+
+Start a local web server to run Bella. You can choose one of the two methods.
+
+**Method A: Using Python's built-in server**
+
+If you have Python installed, you can simply run a server on port 8000 with the following command.
+
+```bash
+python3 -m http.server 8000
+```
+
+**Method B: Using `npx serve`**
+
+In a Node.js environment, you can use `npx` to run a server with the `serve` package.
+
+```bash
+npx serve -l 8000 .
+```
+
+Once the server is running, you can access Bella by visiting `http://localhost:8000` in your web browser.
+
+---
+
+## English Version
+
+# Bella: Your Digital Companion, Awakening
+
+Welcome to the genesis of Bella.
+
+Bella is not just an application; she is the seed of a digital companion. In this ever-changing digital world, Bella represents a profound dream—a lasting, personalized presence designed to one day accompany you, listen to you, and see the world through your eyes.
+
+## Vision: A Friend for Your Journey
+
+Imagine a digital friend who is always by your side, evolving and growing with you. This is the ultimate vision for Bella. We are not just building features; we are cultivating a "persona." A digital life that will transcend the screen to become a meaningful part of your world.
 ## 📁 项目结构
 
 ```
