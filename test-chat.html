@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天界面测试</title>
+    <link rel="stylesheet" href="chatStyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+        }
+        .test-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #ff5a8a;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h3>聊天界面测试</h3>
+        <button class="test-btn" onclick="showChat()">显示聊天界面</button>
+        <button class="test-btn" onclick="hideChat()">隐藏聊天界面</button>
+        <button class="test-btn" onclick="toggleChat()">切换聊天界面</button>
+        <button class="test-btn" onclick="checkStatus()">检查状态</button>
+        <div class="status" id="status">等待操作...</div>
+    </div>
+
+    <script src="chatInterface.js"></script>
+    <script>
+        let chatInterface;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('测试页面加载完成');
+            
+            try {
+                chatInterface = new ChatInterface();
+                console.log('ChatInterface 创建成功:', chatInterface);
+                updateStatus('ChatInterface 创建成功');
+                
+                // 设置消息回调
+                chatInterface.onMessageSend = function(message) {
+                    console.log('收到消息:', message);
+                    setTimeout(() => {
+                        chatInterface.addMessage('assistant', '测试回复: ' + message);
+                    }, 1000);
+                };
+                
+            } catch (error) {
+                console.error('ChatInterface 创建失败:', error);
+                updateStatus('ChatInterface 创建失败: ' + error.message);
+            }
+        });
+        
+        function showChat() {
+            if (chatInterface) {
+                console.log('尝试显示聊天界面');
+                chatInterface.show();
+                updateStatus('调用 show() 方法，当前状态: ' + chatInterface.getVisibility());
+            } else {
+                updateStatus('ChatInterface 未初始化');
+            }
+        }
+        
+        function hideChat() {
+            if (chatInterface) {
+                console.log('尝试隐藏聊天界面');
+                chatInterface.hide();
+                updateStatus('调用 hide() 方法，当前状态: ' + chatInterface.getVisibility());
+            } else {
+                updateStatus('ChatInterface 未初始化');
+            }
+        }
+        
+        function toggleChat() {
+            if (chatInterface) {
+                console.log('尝试切换聊天界面');
+                chatInterface.toggle();
+                updateStatus('调用 toggle() 方法，当前状态: ' + chatInterface.getVisibility());
+            } else {
+                updateStatus('ChatInterface 未初始化');
+            }
+        }
+        
+        function checkStatus() {
+            if (chatInterface) {
+                const isVisible = chatInterface.getVisibility();
+                const className = chatInterface.chatContainer.className;
+                const computedStyle = window.getComputedStyle(chatInterface.chatContainer);
+                const opacity = computedStyle.opacity;
+                const transform = computedStyle.transform;
+                const zIndex = computedStyle.zIndex;
+                
+                const statusText = `
+                    可见性: ${isVisible}
+                    类名: ${className}
+                    透明度: ${opacity}
+                    变换: ${transform}
+                    层级: ${zIndex}
+                `;
+                
+                console.log('聊天界面状态:', statusText);
+                updateStatus(statusText);
+            } else {
+                updateStatus('ChatInterface 未初始化');
+            }
+        }
+        
+        function updateStatus(text) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = text;
+        }
+    </script>
+</body>
+</html>

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Assistant</title>
+    <title>Bella - Your AI Companion</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="chatStyles.css">
     <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -42,8 +43,22 @@
             </button>
         </footer>
 
+        <!-- 聊天控制面板 -->
+        <div class="chat-control-panel">
+            <button id="chat-toggle-btn" class="control-btn primary">
+                <i class="fas fa-comments"></i>
+                <span>聊天</span>
+            </button>
+            <button id="chat-test-btn" class="control-btn secondary">
+                <i class="fas fa-paper-plane"></i>
+                <span>测试</span>
+            </button>
+        </div>
+
     </div>
 
+    <script type="module" src="core.js"></script>
+    <script type="module" src="chatInterface.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 </html>

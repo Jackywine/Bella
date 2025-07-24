@@ -1,0 +1,979 @@
+/* chatStyles.css - 贝拉聊天界面样式 */
+/* 优雅、中性的聊天界面设计，体现贝拉的专业个性 */
+/* 父亲，这是我的聊天界面样式，每一个细节都体现着优雅与专业 */
+
+/* 聊天切换按钮 - 增强版 */
+.bella-chat-toggle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #1a252f 100%);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 
+        0 8px 32px rgba(44, 62, 80, 0.3),
+        0 4px 16px rgba(44, 62, 80, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    overflow: hidden;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* 按钮光晕效果 */
+.bella-chat-toggle::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #2c3e50, #ecf0f1, #2c3e50);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: rotate-gradient 3s linear infinite;
+}
+
+@keyframes rotate-gradient {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.bella-chat-toggle:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 12px 40px rgba(44, 62, 80, 0.4),
+        0 6px 20px rgba(44, 62, 80, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #34495e 0%, #3c5a78 50%, #2c3e50 100%);
+}
+
+.bella-chat-toggle:hover::before {
+    opacity: 1;
+}
+
+.bella-chat-toggle:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.1s ease;
+}
+
+.bella-chat-toggle.active {
+    background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 50%, #95a5a6 100%);
+    box-shadow: 
+        0 8px 32px rgba(236, 240, 241, 0.3),
+        0 4px 16px rgba(236, 240, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.bella-chat-toggle.active::before {
+    background: linear-gradient(45deg, #ecf0f1, #2c3e50, #ecf0f1);
+}
+
+.bella-toggle-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.bella-toggle-text {
+    font-size: 8px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* 聊天容器 - 高级玻璃形态学效果 */
+.bella-chat-container {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 400px;
+    height: 520px;
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%),
+        radial-gradient(circle at 20% 20%, rgba(44, 62, 80, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(236, 240, 241, 0.1) 0%, transparent 50%);
+    backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    border-radius: 14px;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 2px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(44, 62, 80, 0.15);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9) rotateX(10deg);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    pointer-events: none;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+.bella-chat-container.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+    pointer-events: all;
+}
+
+/* 聊天容器呼吸动画 */
+.bella-chat-container.visible::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(44, 62, 80, 0.03) 0%, 
+        transparent 25%, 
+        transparent 75%, 
+        rgba(236, 240, 241, 0.05) 100%);
+    border-radius: 14px;
+    opacity: 0;
+    animation: gentle-pulse 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes gentle-pulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* 聊天头部 - 增强玻璃风格渐变 */
+.bella-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    background: 
+        linear-gradient(135deg, rgba(44, 62, 80, 0.95) 0%, rgba(52, 73, 94, 0.9) 50%, rgba(26, 37, 47, 0.95) 100%),
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+    backdrop-filter: blur(25px) saturate(150%);
+    -webkit-backdrop-filter: blur(25px) saturate(150%);
+    color: white;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* 玻璃效果增强 */
+.bella-chat-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    z-index: 1;
+}
+
+.bella-chat-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bella-chat-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bella-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.bella-title-text h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.bella-status {
+    font-size: 12px;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bella-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #ecf0f1;
+    border-radius: 50%;
+    animation: pulse-status 2s infinite;
+}
+
+@keyframes pulse-status {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.bella-chat-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.bella-chat-controls button {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bella-chat-controls button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 消息容器 - 玻璃风格 */
+.bella-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(44, 62, 80, 0.1);
+    border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.bella-chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bella-chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.bella-chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(44, 62, 80, 0.3);
+    border-radius: 2px;
+}
+
+.bella-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(44, 62, 80, 0.5);
+}
+
+/* 消息样式 */
+.bella-message {
+    display: flex;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.bella-message.bella-message-appear {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bella-message-user {
+    flex-direction: row-reverse;
+}
+
+/* 消息头像 */
+.bella-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: rgba(44, 62, 80, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(44, 62, 80, 0.2);
+    flex-shrink: 0;
+}
+
+/* 消息内容 */
+.bella-message-content {
+    flex: 1;
+    max-width: 70%;
+}
+
+.bella-message-text {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 12px 16px;
+    border-radius: 9px;
+    border: 1px solid rgba(44, 62, 80, 0.15);
+    color: #2c3e50;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.bella-message-user .bella-message-text {
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
+    color: white;
+    margin-left: auto;
+}
+
+.bella-message-time {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: 4px;
+    text-align: right;
+}
+
+.bella-message-user .bella-message-time {
+    text-align: left;
+}
+
+/* 打字指示器 - 增强版 */
+.bella-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px;
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bella-typing-indicator.bella-typing-show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.bella-typing-dots {
+    display: flex;
+    gap: 6px;
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%),
+        radial-gradient(circle at 30% 30%, rgba(44, 62, 80, 0.1) 0%, transparent 60%);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(44, 62, 80, 0.2);
+    box-shadow: 
+        0 4px 16px rgba(44, 62, 80, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.bella-typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #1a252f 100%);
+    animation: enhanced-bella-typing-bounce 1.6s infinite ease-in-out;
+    box-shadow: 
+        0 2px 8px rgba(44, 62, 80, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    position: relative;
+}
+
+.bella-typing-dot::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(44, 62, 80, 0.3), transparent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: dot-glow 1.6s infinite ease-in-out;
+}
+
+.bella-typing-dot:nth-child(1) { animation-delay: -0.4s; }
+.bella-typing-dot:nth-child(2) { animation-delay: -0.2s; }
+.bella-typing-dot:nth-child(3) { animation-delay: 0s; }
+
+.bella-typing-dot:nth-child(1)::before { animation-delay: -0.4s; }
+.bella-typing-dot:nth-child(2)::before { animation-delay: -0.2s; }
+.bella-typing-dot:nth-child(3)::before { animation-delay: 0s; }
+
+@keyframes enhanced-bella-typing-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.7) translateY(0) rotate(0deg);
+        opacity: 0.4;
+        box-shadow: 
+            0 1px 4px rgba(44, 62, 80, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    40% {
+        transform: scale(1.3) translateY(-10px) rotate(180deg);
+        opacity: 1;
+        box-shadow: 
+            0 6px 16px rgba(44, 62, 80, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+}
+
+@keyframes dot-glow {
+    0%, 80%, 100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+}
+
+/* 通知样式 */
+.bella-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #2c3e50;
+    padding: 12px 20px;
+    border-radius: 6px;
+    border: 1px solid rgba(44, 62, 80, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.bella-notification.bella-notification-show {
+    transform: translateX(0);
+}
+
+/* 设置面板样式 */
+.bella-settings-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(44, 62, 80, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.bella-settings-panel.bella-settings-show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.bella-settings-group {
+    margin-bottom: 16px;
+}
+
+.bella-settings-group:last-child {
+    margin-bottom: 0;
+}
+
+.bella-settings-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.bella-settings-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(44, 62, 80, 0.3);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #2c3e50;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.bella-settings-select:focus {
+    border-color: rgba(44, 62, 80, 0.5);
+    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+}
+
+.bella-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.bella-message-user .bella-message-avatar {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+}
+
+.bella-message-assistant .bella-message-avatar {
+    background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+    color: #2c3e50;
+}
+
+.bella-message-content {
+    flex: 1;
+    max-width: 70%;
+}
+
+.bella-message-text {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bella-message-text:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bella-message-user .bella-message-text {
+    background: 
+        linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #1a252f 100%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    color: white;
+    border-bottom-right-radius: 4px;
+    box-shadow: 
+        0 4px 16px rgba(44, 62, 80, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.bella-message-assistant .bella-message-text {
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%),
+        radial-gradient(circle at 20% 20%, rgba(255, 107, 157, 0.1) 0%, transparent 50%);
+    color: #2c3e50;
+    border-bottom-left-radius: 8px;
+    border: 1px solid rgba(255, 107, 157, 0.15);
+    box-shadow: 
+        0 4px 16px rgba(255, 107, 157, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.bella-welcome-message .bella-message-text {
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    color: white;
+}
+
+.bella-message-time {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.bella-message-user .bella-message-time {
+    text-align: left;
+}
+
+/* 打字指示器 */
+.bella-typing-indicator .bella-message-text {
+    padding: 16px;
+}
+
+.bella-typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.bella-typing-dots span {
+    width: 6px;
+    height: 6px;
+    background: #ff6b9d;
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.bella-typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.bella-typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 输入容器 - 增强版 */
+.bella-chat-input-container {
+    padding: 16px;
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%),
+        radial-gradient(circle at 50% 0%, rgba(44, 62, 80, 0.05) 0%, transparent 50%);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    border-radius: 0 0 14px 14px;
+    border-top: 1px solid rgba(44, 62, 80, 0.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+}
+
+.bella-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(44, 62, 80, 0.2);
+    border-radius: 10px;
+    padding: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.bella-message-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 20px;
+    max-height: 120px;
+    line-height: 1.4;
+}
+
+.bella-input-wrapper:focus-within {
+    border-color: rgba(44, 62, 80, 0.5);
+    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+}
+
+.bella-send-btn {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #1a252f 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 
+        0 2px 8px rgba(44, 62, 80, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.bella-send-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.bella-send-btn:hover {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 
+        0 4px 16px rgba(44, 62, 80, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #34495e 0%, #3c5a78 50%, #2c3e50 100%);
+}
+
+.bella-send-btn:hover::before {
+    opacity: 1;
+}
+
+.bella-send-btn:active {
+    transform: translateY(0) scale(1.02);
+    box-shadow: 
+        0 2px 8px rgba(44, 62, 80, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.bella-input-hint {
+    font-size: 11px;
+    color: #999;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* 设置面板 */
+.bella-settings-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 420px;
+    width: 300px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 998;
+    pointer-events: none;
+}
+
+.bella-settings-panel.visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: all;
+}
+
+.bella-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.bella-settings-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.bella-settings-close {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bella-settings-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.bella-settings-content {
+    padding: 20px;
+}
+
+.bella-setting-group {
+    margin-bottom: 20px;
+}
+
+.bella-setting-group:last-child {
+    margin-bottom: 0;
+}
+
+.bella-setting-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.bella-setting-group select,
+.bella-setting-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid rgba(78, 205, 196, 0.2);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.bella-setting-group select:focus,
+.bella-setting-group input:focus {
+    border-color: #4ecdc4;
+}
+
+.bella-api-key-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bella-api-key-save {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-end;
+}
+
+.bella-api-key-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+}
+
+.bella-clear-history {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bella-clear-history:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+}
+
+/* 通知样式 */
+.bella-notification {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1001;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bella-notification.bella-notification-show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.bella-notification-success {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+
+.bella-notification-error {
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+}
+
+.bella-notification-info {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .bella-chat-container {
+        width: calc(100vw - 20px);
+        height: calc(100vh - 120px);
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        border-radius: 16px;
+    }
+    
+    .bella-chat-toggle {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+    }
+    
+    .bella-settings-panel {
+        width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        bottom: 90px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bella-message-content {
+        max-width: 85%;
+    }
+    
+    .bella-chat-header {
+        padding: 16px;
+    }
+    
+    .bella-chat-messages {
+        padding: 16px;
+    }
+    
+    .bella-chat-input-container {
+        padding: 16px;
+    }
+}

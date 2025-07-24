@@ -324,6 +324,81 @@ html, body {
     text-decoration: underline;
 }
 
+/* --- 聊天控制面板 --- */
+.chat-control-panel {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    gap: 15px;
+    z-index: 1002; /* 确保在所有元素之上 */
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.8s ease 2s, transform 0.8s ease 2s; /* 延迟2秒显示 */
+}
+
+.chat-control-panel.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    pointer-events: auto;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn.primary {
+    background: rgba(255, 107, 157, 0.9);
+    color: white;
+}
+
+.control-btn.primary:hover {
+    background: rgba(255, 107, 157, 1);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.3);
+}
+
+.control-btn.secondary {
+    background: rgba(78, 205, 196, 0.9);
+    color: white;
+}
+
+.control-btn.secondary:hover {
+    background: rgba(78, 205, 196, 1);
+    box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+}
+
+.control-btn i {
+    font-size: 16px;
+}
+
+.control-btn span {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
     .content-overlay {
@@ -350,5 +425,20 @@ html, body {
     .footer-credit {
         margin-top: 15px;
         font-size: 0.9rem;
+    }
+
+    .chat-control-panel {
+        top: 20px;
+        left: 20px;
+        gap: 10px;
+    }
+
+    .control-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .control-btn i {
+        font-size: 14px;
     }
 }
