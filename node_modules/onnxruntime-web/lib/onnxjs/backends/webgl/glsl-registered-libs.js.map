@@ -1,1 +1,0 @@
-{"version":3,"file":"glsl-registered-libs.js","sourceRoot":"","sources":["glsl-registered-libs.ts"],"names":[],"mappings":";AAAA,4DAA4D;AAC5D,kCAAkC;;;AAElC,+DAAoD;AAEpD,2DAAoD;AACpD,6DAAsD;AACtD,iEAAyD;AACzD,iDAA0C;AAE7B,QAAA,YAAY,GAA4D;IACnF,UAAU,EAAE,mCAAe;IAC3B,WAAW,EAAE,qCAAgB;IAC7B,KAAK,EAAE,yBAAU;IACjB,YAAY,EAAE,wCAAiB;IAC/B,aAAa,EAAE,mCAAa;IAC5B,2BAA2B;CAC5B,CAAC"}
