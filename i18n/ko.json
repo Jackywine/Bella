@@ -2,10 +2,60 @@
   "app": {
     "title": "벨라 - 당신의 AI 동반자",
     "chat_button": "채팅",
-    "chat_placeholder": "벨라와 채팅해보세요..."
+    "chat_placeholder": "벨라와 채팅해보세요...",
+    "close": "닫기",
+    "test": "테스트"
+  },
+  "chat": {
+    "title": "벨라",
+    "status": "온라인",
+    "input_placeholder": "벨라와 대화해보세요...",
+    "input_hint": "Enter 키로 전송, Shift + Enter 키로 줄바꿈",
+    "welcome_message": "안녕하세요! 저는 벨라, 당신의 AI 동반자예요. 만나서 반가워요! 무엇을 이야기하고 싶으신가요?",
+    "settings": "설정",
+    "minimize": "최소화",
+    "toggle_text": "벨라와 채팅"
+  },
+  "settings": {
+    "title": "채팅 설정",
+    "provider_label": "AI 서비스 제공업체",
+    "provider_local": "로컬 모델",
+    "provider_openai": "OpenAI GPT",
+    "provider_qwen": "통의천문",
+    "provider_ernie": "문심일언",
+    "provider_glm": "지보AI",
+    "api_key_label": "API 키",
+    "api_key_placeholder": "API 키를 입력하세요",
+    "api_key_save": "저장",
+    "api_key_saved": "API 키가 저장되었습니다",
+    "chat_mode_label": "채팅 모드",
+    "mode_casual": "편안한 대화",
+    "mode_assistant": "스마트 어시스턴트",
+    "mode_creative": "창의적 파트너",
+    "clear_history": "채팅 기록 삭제"
+  },
+  "speech": {
+    "listening": "듣는 중...",
+    "ready": "벨라가 준비되었습니다. 마이크를 클릭하여 대화를 시작하세요.",
+    "loading_ai": "벨라의 핵심을 깨우는 중...",
+    "ai_failed": "AI 모델 로드에 실패했지만 채팅 인터페이스는 여전히 사용할 수 있습니다.",
+    "thinking": "벨라가 생각 중...",
+    "processing_error": "벨라가 처리 중 문제를 겪었지만 여전히 열심히 배우고 있어요...",
+    "no_support": "브라우저가 음성 인식을 지원하지 않습니다."
   },
   "responses": {
     "greeting": "안녕하세요! 저는 벨라, 당신의 AI 동반자입니다. 오늘 어떻게 도와드릴까요?",
-    "ai_prompt": "당신은 벨라, 친근하고 도움이 되는 AI 어시스턴트입니다. 한국어로 따뜻하고 대화적인 방식으로 응답해주세요."
+    "ai_prompt": "당신은 벨라, 친근하고 도움이 되는 AI 어시스턴트입니다. 한국어로 따뜻하고 대화적인 방식으로 응답해주세요.",
+    "fallback": [
+      "제 AI 핵심이 아직 로딩 중이에요. 나중에 다시 시도해 주세요...",
+      "죄송해요, 지금은 정상적으로 생각할 수 없지만 열심히 배우고 있어요!",
+      "제 뇌가 아직 시작 중이에요. 조금만 시간을 주세요...",
+      "시스템이 업데이트 중이라 일시적으로 스마트한 답변을 제공할 수 없어요."
+    ],
+    "test_messages": [
+      "안녕하세요! 저는 벨라예요. 만나서 반가워요!",
+      "채팅 인터페이스가 정상적으로 작동하고 있고, 모든 기능이 준비되었어요.",
+      "이것은 인터페이스 기능을 확인하기 위한 테스트 메시지예요."
+    ]
   }
 }

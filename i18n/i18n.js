@@ -63,14 +63,28 @@ class I18n {
         document.documentElement.lang = this.currentLanguage;
         document.title = this.t('app.title');
         
+        // Update main chat button
         const chatButton = document.querySelector('.chat-button span');
         if (chatButton) {
             chatButton.textContent = this.t('app.chat_button');
         }
         
+        // Update chat input placeholder
         const chatInput = document.querySelector('#chat-input');
         if (chatInput) {
             chatInput.placeholder = this.t('app.chat_placeholder');
+        }
+        
+        // Update control panel buttons
+        const chatToggleBtn = document.querySelector('#chat-toggle-btn span');
+        const chatTestBtn = document.querySelector('#chat-test-btn span');
+        
+        if (chatToggleBtn) {
+            chatToggleBtn.textContent = this.t('app.chat_button');
+        }
+        
+        if (chatTestBtn) {
+            chatTestBtn.textContent = this.t('app.test');
         }
     }
 
