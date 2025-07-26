@@ -25,6 +25,25 @@ class ChatInterface {
         this.createSettingsPanel();
         this.bindEvents();
         this.addWelcomeMessage();
+        
+        // Listen for language changes
+        if (window.i18n) {
+            const originalSetLanguage = window.i18n.setLanguage.bind(window.i18n);
+            window.i18n.setLanguage = (lang) => {
+                originalSetLanguage(lang);
+                this.updateInterfaceLanguage();
+            };
+        }
+    }
+
+    // Update interface text based on current language
+    updateInterfaceLanguage() {
+        if (!window.i18n) return;
+        
+        // Update placeholder
+        if (this.messageInput) {
+            this.messageInput.placeholder = window.i18n.t('app.chat_placeholder');
+        }
     }
 
     // 创建聊天容器

@@ -8,6 +8,27 @@
     <link rel="stylesheet" href="chatStyles.css">
     <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- 语言切换样式 -->
+    <style>
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .language-selector select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .language-selector select option {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,6 +47,15 @@
             <source src="" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+    </div>
+
+    <!-- 语言选择器 -->
+    <div class="language-selector">
+        <select id="language-selector">
+            <option value="en">English</option>
+            <option value="zh-CN">中文</option>
+            <option value="ko">한국어</option>
+        </select>
     </div>
 
     <!-- 内容层，覆盖在视频之上 -->
@@ -57,6 +87,7 @@
 
     </div>
 
+    <script src="i18n/i18n.js"></script>
     <script type="module" src="core.js"></script>
     <script type="module" src="chatInterface.js"></script>
     <script type="module" src="script.js"></script>

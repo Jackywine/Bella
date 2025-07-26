@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const video1 = document.getElementById('video1');
     const video2 = document.getElementById('video2');
     const micButton = document.getElementById('mic-button');
+    const languageSelector = document.getElementById('language-selector');
+
+    // --- Initialize i18n and language selector ---
+    if (window.i18n) {
+        await window.i18n.init();
+        
+        // Set up language selector
+        if (languageSelector) {
+            languageSelector.value = window.i18n.getCurrentLanguage();
+            languageSelector.addEventListener('change', (e) => {
+                window.i18n.setLanguage(e.target.value);
+            });
+        }
+    }
 
 
     // --- AI Core Initialization ---
@@ -210,8 +224,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true; // 持续识别
-        recognition.lang = 'zh-CN'; // 设置语言为中文
+        recognition.lang = 'zh-CN'; // 初始设置语言为中文
         recognition.interimResults = true; // 获取临时结果
+        
+        // Store recognition globally for i18n access
+        window.recognition = recognition;
 
         recognition.onresult = async (event) => {
             const transcriptContainer = document.getElementById('transcript');
