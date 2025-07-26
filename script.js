@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const video1 = document.getElementById('video1');
     const video2 = document.getElementById('video2');
     const micButton = document.getElementById('mic-button');
+    const languageSelector = document.getElementById('language-selector');
+
+    // --- Initialize i18n and language selector ---
+    if (window.i18n) {
+        await window.i18n.init();
+        
+        // Set up language selector
+        if (languageSelector) {
+            languageSelector.value = window.i18n.getCurrentLanguage();
+            languageSelector.addEventListener('change', (e) => {
+                window.i18n.setLanguage(e.target.value);
+            });
+        }
+    }
 
 
     // --- AI Core Initialization ---
@@ -37,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 然后尝试初始化AI核心
     micButton.disabled = true;
-    transcriptDiv.textContent = '正在唤醒贝拉的核心...';
+    transcriptDiv.textContent = window.i18n ? window.i18n.t('speech.loading_ai') : '벨라의 핵심을 깨우는 중...';
     try {
         bellaAI = await BellaAI.getInstance();
         console.log('Bella AI 初始化成功');
@@ -53,16 +67,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 } catch (error) {
                     console.error('AI处理错误:', error);
                     chatInterface.hideTypingIndicator();
-                    chatInterface.addMessage('assistant', '抱歉，我现在有点困惑，请稍后再试...');
+                    chatInterface.addMessage('assistant', window.i18n ? window.i18n.t('speech.processing_error') : '벨라가 처리 중 문제를 겪었지만 여전히 열심히 배우고 있어요...');
                 }
             };
         }
         
         micButton.disabled = false;
-        transcriptDiv.textContent = '贝拉已准备好，请点击麦克风开始对话。';
+        transcriptDiv.textContent = window.i18n ? window.i18n.t('speech.ready') : '벨라가 준비되었습니다. 마이크를 클릭하여 대화를 시작하세요.';
     } catch (error) {
         console.error('Failed to initialize Bella AI:', error);
-        transcriptDiv.textContent = 'AI模型加载失败，但聊天界面仍可使用。';
+        transcriptDiv.textContent = window.i18n ? window.i18n.t('speech.ai_failed') : 'AI 모델 로드에 실패했지만 채팅 인터페이스는 여전히 사용할 수 있습니다.';
         
         // 即使AI失败，也提供基本的聊天功能
         if (chatInterface) {
@@ -70,11 +84,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 chatInterface.showTypingIndicator();
                 setTimeout(() => {
                     chatInterface.hideTypingIndicator();
-                    const fallbackResponses = [
-                        '我的AI核心还在加载中，请稍后再试...',
-                        '抱歉，我现在无法正常思考，但我会努力学习的！',
-                        '我的大脑还在启动中，请给我一点时间...',
-                        '系统正在更新，暂时无法提供智能回复。'
+                    const fallbackResponses = window.i18n ? window.i18n.t('responses.fallback') : [
+                        '제 AI 핵심이 아직 로딩 중이에요. 나중에 다시 시도해 주세요...',
+                        '죄송해요, 지금은 정상적으로 생각할 수 없지만 열심히 배우고 있어요!',
+                        '제 뇌가 아직 시작 중이에요. 조금만 시간을 주세요...',
+                        '시스템이 업데이트 중이라 일시적으로 스마트한 답변을 제공할 수 없어요.'
                     ];
                     const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
                     chatInterface.addMessage('assistant', randomResponse);
@@ -171,9 +185,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 // 更新按钮状态
                 const isVisible = chatInterface.getVisibility();
+                const closeText = window.i18n ? window.i18n.t('app.close') : '닫기';
+                const chatText = window.i18n ? window.i18n.t('app.chat_button') : '채팅';
                 chatToggleBtn.innerHTML = isVisible ? 
-                    '<i class="fas fa-times"></i><span>关闭</span>' : 
-                    '<i class="fas fa-comments"></i><span>聊天</span>';
+                    `<i class="fas fa-times"></i><span>${closeText}</span>` : 
+                    `<i class="fas fa-comments"></i><span>${chatText}</span>`;
                 console.log('按钮文本更新为:', chatToggleBtn.innerHTML);
             }
         });
@@ -182,10 +198,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (chatTestBtn) {
         chatTestBtn.addEventListener('click', () => {
             if (chatInterface) {
-                const testMessages = [
-                    '你好！我是贝拉，很高兴见到你！',
-                    '聊天界面工作正常，所有功能都已就绪。',
-                    '这是一条测试消息，用来验证界面功能。'
+                const testMessages = window.i18n ? window.i18n.t('responses.test_messages') : [
+                    '안녕하세요! 저는 벨라예요. 만나서 반가워요!',
+                    '채팅 인터페이스가 정상적으로 작동하고 있고, 모든 기능이 준비되었어요.',
+                    '이것은 인터페이스 기능을 확인하기 위한 테스트 메시지예요.'
                 ];
                 const randomMessage = testMessages[Math.floor(Math.random() * testMessages.length)];
                 chatInterface.addMessage('assistant', randomMessage);
@@ -193,7 +209,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // 如果聊天界面未显示，则自动显示
                 if (!chatInterface.getVisibility()) {
                     chatInterface.show();
-                    chatToggleBtn.innerHTML = '<i class="fas fa-times"></i><span>关闭</span>';
+                    const closeText = window.i18n ? window.i18n.t('app.close') : '닫기';
+                    chatToggleBtn.innerHTML = `<i class="fas fa-times"></i><span>${closeText}</span>`;
                 }
                 
                 console.log('测试消息已添加:', randomMessage);
@@ -210,8 +227,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true; // 持续识别
-        recognition.lang = 'zh-CN'; // 设置语言为中文
+        recognition.lang = 'zh-CN'; // 初始设置语言为中文
         recognition.interimResults = true; // 获取临时结果
+        
+        // Store recognition globally for i18n access
+        window.recognition = recognition;
 
         recognition.onresult = async (event) => {
             const transcriptContainer = document.getElementById('transcript');
@@ -226,13 +246,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
 
-            // Update interim results
-            transcriptContainer.textContent = `你: ${final_transcript || interim_transcript}`;
+            // Update interim results  
+            const youText = window.i18n && window.i18n.getCurrentLanguage() === 'ko' ? '당신' : '你';
+            transcriptContainer.textContent = `${youText}: ${final_transcript || interim_transcript}`;
 
             // Once we have a final result, process it with the AI
             if (final_transcript && bellaAI) {
                 const userText = final_transcript.trim();
-                transcriptContainer.textContent = `你: ${userText}`;
+                const youText = window.i18n && window.i18n.getCurrentLanguage() === 'ko' ? '당신' : '你';
+                transcriptContainer.textContent = `${youText}: ${userText}`;
 
                 // 如果聊天界面已打开，也在聊天窗口中显示
                 if (chatInterface && chatInterface.getVisibility()) {
@@ -242,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 try {
                     // Let Bella think
                     const thinkingText = document.createElement('p');
-                    thinkingText.textContent = '贝拉正在思考...';
+                    thinkingText.textContent = window.i18n ? window.i18n.t('speech.thinking') : '벨라가 생각 중...';
                     thinkingText.style.color = '#888';
                     thinkingText.style.fontStyle = 'italic';
                     transcriptContainer.appendChild(thinkingText);
@@ -251,7 +273,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     
                     transcriptContainer.removeChild(thinkingText);
                     const bellaText = document.createElement('p');
-                    bellaText.textContent = `贝拉: ${response}`;
+                    const bellaName = window.i18n && window.i18n.getCurrentLanguage() === 'ko' ? '벨라' : '贝拉';
+                    bellaText.textContent = `${bellaName}: ${response}`;
                     bellaText.style.color = '#ff6b9d';
                     bellaText.style.fontWeight = 'bold';
                     bellaText.style.marginTop = '10px';
@@ -273,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 } catch (error) {
                     console.error('Bella AI processing error:', error);
                     const errorText = document.createElement('p');
-                    const errorMsg = '贝拉处理时遇到问题，但她还在努力学习中...';
+                    const errorMsg = window.i18n ? window.i18n.t('speech.processing_error') : '벨라가 처리 중 문제를 겪었지만 여전히 열심히 배우고 있어요...';
                     errorText.textContent = errorMsg;
                     errorText.style.color = '#ff9999';
                     transcriptContainer.appendChild(errorText);
@@ -306,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const transcriptText = document.getElementById('transcript');
 
         if (isListening) {
-            transcriptText.textContent = '聆听中...'; // 立刻显示提示
+            transcriptText.textContent = window.i18n ? window.i18n.t('speech.listening') : '듣는 중...'; // 즉시 표시
             transcriptContainer.classList.add('visible');
             recognition.start();
         } else {

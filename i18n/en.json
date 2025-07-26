@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "Bella - Your AI Companion",
+    "chat_button": "Chat",
+    "chat_placeholder": "Chat with Bella..."
+  },
+  "responses": {
+    "greeting": "Hello! I'm Bella, your AI companion. How can I help you today?",
+    "ai_prompt": "You are Bella, a friendly and helpful AI assistant. Please respond in English in a warm and conversational manner."
+  }
+}

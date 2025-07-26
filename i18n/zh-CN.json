@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "贝拉 - 您的AI伙伴",
+    "chat_button": "聊天",
+    "chat_placeholder": "和贝拉聊聊天..."
+  },
+  "responses": {
+    "greeting": "你好！我是贝拉，你的AI伙伴。今天我能为你做些什么？",
+    "ai_prompt": "你是贝拉，一个友好且乐于助人的AI助手。你需要用中文回应，并且要温暖而有对话感。"
+  }
+}

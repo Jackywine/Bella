@@ -25,6 +25,66 @@ class ChatInterface {
         this.createSettingsPanel();
         this.bindEvents();
         this.addWelcomeMessage();
+        
+        // Listen for language changes
+        if (window.i18n) {
+            const originalSetLanguage = window.i18n.setLanguage.bind(window.i18n);
+            window.i18n.setLanguage = (lang) => {
+                originalSetLanguage(lang);
+                this.updateInterfaceLanguage();
+            };
+        }
+    }
+
+    // Update interface text based on current language
+    updateInterfaceLanguage() {
+        if (!window.i18n) return;
+        
+        // Update chat header
+        const titleText = this.chatContainer.querySelector('.bella-title-text h3');
+        const statusText = this.chatContainer.querySelector('.bella-status');
+        
+        if (titleText) {
+            titleText.textContent = window.i18n.t('chat.title');
+        }
+        if (statusText) {
+            statusText.textContent = window.i18n.t('chat.status');
+        }
+        
+        // Update input placeholder
+        if (this.messageInput) {
+            this.messageInput.placeholder = window.i18n.t('chat.input_placeholder');
+        }
+        
+        // Update input hint
+        const inputHint = this.chatContainer.querySelector('.bella-input-hint');
+        if (inputHint) {
+            inputHint.textContent = window.i18n.t('chat.input_hint');
+        }
+        
+        // Update toggle button text
+        const toggleText = this.toggleButton.querySelector('.bella-toggle-text');
+        if (toggleText) {
+            toggleText.textContent = window.i18n.t('chat.toggle_text');
+        }
+        
+        // Update buttons tooltips
+        const settingsBtn = this.chatContainer.querySelector('.bella-settings-btn');
+        const minimizeBtn = this.chatContainer.querySelector('.bella-minimize-btn');
+        const sendBtn = this.chatContainer.querySelector('.bella-send-btn');
+        
+        if (settingsBtn) {
+            settingsBtn.title = window.i18n.t('chat.settings');
+        }
+        if (minimizeBtn) {
+            minimizeBtn.title = window.i18n.t('chat.minimize');
+        }
+        if (sendBtn) {
+            sendBtn.title = window.i18n.t('app.chat_button');
+        }
+        
+        // Update settings panel
+        this.updateSettingsLanguage();
     }
 
     // 创建聊天容器
@@ -37,15 +97,15 @@ class ChatInterface {
                 <div class="bella-chat-title">
                     <div class="bella-avatar">💝</div>
                     <div class="bella-title-text">
-                        <h3>贝拉</h3>
-                        <span class="bella-status">在线</span>
+                        <h3>벨라</h3>
+                        <span class="bella-status">온라인</span>
                     </div>
                 </div>
                 <div class="bella-chat-controls">
-                    <button class="bella-settings-btn" title="设置">
+                    <button class="bella-settings-btn" title="설정">
                         <i class="fas fa-cog"></i>
                     </button>
-                    <button class="bella-minimize-btn" title="最小化">
+                    <button class="bella-minimize-btn" title="최소화">
                         <i class="fas fa-minus"></i>
                     </button>
                 </div>
@@ -53,13 +113,13 @@ class ChatInterface {
             <div class="bella-chat-messages"></div>
             <div class="bella-chat-input-container">
                 <div class="bella-input-wrapper">
-                    <input type="text" class="bella-message-input" placeholder="和贝拉聊聊天..." maxlength="500">
-                    <button class="bella-send-btn" title="发送">
+                    <input type="text" class="bella-message-input" placeholder="벨라와 대화해보세요..." maxlength="500">
+                    <button class="bella-send-btn" title="전송">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
                 <div class="bella-input-hint">
-                    按 Enter 发送，Shift + Enter 换行
+                    Enter 키로 전송, Shift + Enter 키로 줄바꿈
                 </div>
             </div>
         `;
@@ -81,9 +141,9 @@ class ChatInterface {
             <div class="bella-toggle-icon">
                 <i class="fas fa-comments"></i>
             </div>
-            <div class="bella-toggle-text">与贝拉聊天</div>
+            <div class="bella-toggle-text">벨라와 채팅</div>
         `;
-        this.toggleButton.title = '打开聊天窗口';
+        this.toggleButton.title = '채팅 창 열기';
         
         document.body.appendChild(this.toggleButton);
     }
@@ -94,37 +154,37 @@ class ChatInterface {
         this.settingsPanel.className = 'bella-settings-panel';
         this.settingsPanel.innerHTML = `
             <div class="bella-settings-header">
-                <h4>聊天设置</h4>
+                <h4>채팅 설정</h4>
                 <button class="bella-settings-close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="bella-settings-content">
                 <div class="bella-setting-group">
-                    <label>AI服务提供商</label>
+                    <label>AI 서비스 제공업체</label>
                     <select class="bella-provider-select">
-                        <option value="local">本地模型</option>
+                        <option value="local">로컴 모델</option>
                         <option value="openai">OpenAI GPT</option>
-                        <option value="qwen">通义千问</option>
-                        <option value="ernie">文心一言</option>
-                        <option value="glm">智谱AI</option>
+                        <option value="qwen">통의천문</option>
+                        <option value="ernie">문심일언</option>
+                        <option value="glm">지보AI</option>
                     </select>
                 </div>
                 <div class="bella-setting-group bella-api-key-group" style="display: none;">
-                    <label>API密钥</label>
-                    <input type="password" class="bella-api-key-input" placeholder="请输入API密钥">
-                    <button class="bella-api-key-save">保存</button>
+                    <label>API 키</label>
+                    <input type="password" class="bella-api-key-input" placeholder="API 키를 입력하세요">
+                    <button class="bella-api-key-save">저장</button>
                 </div>
                 <div class="bella-setting-group">
-                    <label>聊天模式</label>
+                    <label>채팅 모드</label>
                     <select class="bella-mode-select">
-                        <option value="casual">轻松聊天</option>
-                        <option value="assistant">智能助手</option>
-                        <option value="creative">创意伙伴</option>
+                        <option value="casual">편안한 대화</option>
+                        <option value="assistant">스마트 어시스턴트</option>
+                        <option value="creative">창의적 파트너</option>
                     </select>
                 </div>
                 <div class="bella-setting-group">
-                    <button class="bella-clear-history">清除聊天记录</button>
+                    <button class="bella-clear-history">채팅 기록 삭제</button>
                 </div>
             </div>
         `;
@@ -171,7 +231,59 @@ class ChatInterface {
         this.bindSettingsEvents();
     }
 
-    // 绑定设置面板事件
+    // Update settings panel language
+    updateSettingsLanguage() {
+        if (!window.i18n) return;
+        
+        // Update settings header
+        const settingsTitle = this.settingsPanel.querySelector('.bella-settings-header h4');
+        if (settingsTitle) {
+            settingsTitle.textContent = window.i18n.t('settings.title');
+        }
+        
+        // Update labels and options
+        const labels = this.settingsPanel.querySelectorAll('label');
+        if (labels.length >= 2) {
+            labels[0].textContent = window.i18n.t('settings.provider_label');
+            labels[1].textContent = window.i18n.t('settings.api_key_label');
+            if (labels[2]) labels[2].textContent = window.i18n.t('settings.chat_mode_label');
+        }
+        
+        // Update provider options
+        const providerOptions = this.settingsPanel.querySelectorAll('.bella-provider-select option');
+        if (providerOptions.length >= 5) {
+            providerOptions[0].textContent = window.i18n.t('settings.provider_local');
+            providerOptions[1].textContent = window.i18n.t('settings.provider_openai');
+            providerOptions[2].textContent = window.i18n.t('settings.provider_qwen');
+            providerOptions[3].textContent = window.i18n.t('settings.provider_ernie');
+            providerOptions[4].textContent = window.i18n.t('settings.provider_glm');
+        }
+        
+        // Update mode options
+        const modeOptions = this.settingsPanel.querySelectorAll('.bella-mode-select option');
+        if (modeOptions.length >= 3) {
+            modeOptions[0].textContent = window.i18n.t('settings.mode_casual');
+            modeOptions[1].textContent = window.i18n.t('settings.mode_assistant');
+            modeOptions[2].textContent = window.i18n.t('settings.mode_creative');
+        }
+        
+        // Update buttons
+        const apiKeySaveBtn = this.settingsPanel.querySelector('.bella-api-key-save');
+        const clearHistoryBtn = this.settingsPanel.querySelector('.bella-clear-history');
+        const apiKeyInput = this.settingsPanel.querySelector('.bella-api-key-input');
+        
+        if (apiKeySaveBtn) {
+            apiKeySaveBtn.textContent = window.i18n.t('settings.api_key_save');
+        }
+        if (clearHistoryBtn) {
+            clearHistoryBtn.textContent = window.i18n.t('settings.clear_history');
+        }
+        if (apiKeyInput) {
+            apiKeyInput.placeholder = window.i18n.t('settings.api_key_placeholder');
+        }
+    }
+    
+    // 바인드 설정 패널 이벤트
     bindSettingsEvents() {
         // 关闭设置面板
         this.settingsPanel.querySelector('.bella-settings-close').addEventListener('click', () => {
@@ -201,7 +313,7 @@ class ChatInterface {
             
             if (apiKey.trim()) {
                 this.onAPIKeySave?.(provider, apiKey.trim());
-                this.showNotification('API密钥已保存', 'success');
+                this.showNotification(window.i18n ? window.i18n.t('settings.api_key_saved') : 'API 키가 저장되었습니다', 'success');
             }
         });
 
@@ -213,9 +325,10 @@ class ChatInterface {
         });
     }
 
-    // 添加欢迎消息
+    // 추가 환영 메시지
     addWelcomeMessage() {
-        this.addMessage('assistant', '你好！我是贝拉，你的AI伙伴。很高兴见到你！有什么想聊的吗？', true);
+        const welcomeMsg = window.i18n ? window.i18n.t('chat.welcome_message') : '안녕하세요! 저는 벨라, 당신의 AI 동반자예요. 만나서 반가워요! 무엇을 이야기하고 싶으신가요?';
+        this.addMessage('assistant', welcomeMsg, true);
     }
 
     // 切换聊天窗口显示/隐藏
