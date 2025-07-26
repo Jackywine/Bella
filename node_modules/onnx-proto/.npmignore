@@ -1,9 +1,0 @@
-src/
-proto/
-test/
-scripts/
-coverage/
-bower_components/
-node_modules/
-bower.json
-karma.conf.js
