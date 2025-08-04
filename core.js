@@ -3,6 +3,7 @@
 
 import { pipeline, env, AutoTokenizer, AutoModelForSpeechSeq2Seq } from './vendor/transformers.js';
 import CloudAPIService from './cloudAPI.js';
+import { ConversationContext } from './conversationContext.js';
 
 // Local model configuration
 env.allowLocalModels = true;
@@ -27,6 +28,10 @@ class BellaAI {
         this.cloudAPI = new CloudAPIService();
         this.useCloudAPI = false; // Default to using local model
         this.currentMode = 'casual'; // Chat modes: casual, assistant, creative
+        this.conversationContext = new ConversationContext({
+            maxHistoryLength: 10,
+            maxContextAge: 30 * 60 * 1000 // 30 minutes
+        });
     }
 
     async init() {
@@ -82,6 +87,12 @@ class BellaAI {
             // Sanitize input
             const sanitizedPrompt = this.sanitizeInput(prompt.trim());
             
+            // Add user message to conversation context
+            this.conversationContext.addMessage('user', sanitizedPrompt, {
+                timestamp: startTime,
+                mode: this.currentMode
+            });
+            
             // Create processing timeout
             const processingPromise = this.executeThinkingWithFallback(sanitizedPrompt);
             const timeoutPromise = new Promise((_, reject) => {
@@ -94,8 +105,15 @@ class BellaAI {
             // Validate and clean response
             const cleanedResponse = this.validateAndCleanResponse(response);
             
-            // Log performance metrics
+            // Add assistant response to conversation context
             const processingTime = Date.now() - startTime;
+            this.conversationContext.addMessage('assistant', cleanedResponse, {
+                processingTime,
+                provider: this.useCloudAPI ? 'cloud' : 'local',
+                mode: this.currentMode
+            });
+            
+            // Log performance metrics
             this.logPerformanceMetrics(processingTime, this.useCloudAPI ? 'cloud' : 'local', true);
             
             return cleanedResponse;
@@ -107,7 +125,17 @@ class BellaAI {
             const processingTime = Date.now() - startTime;
             this.logPerformanceMetrics(processingTime, this.useCloudAPI ? 'cloud' : 'local', false);
             
-            return this.handleThinkingError(error, prompt);
+            const errorResponse = this.handleThinkingError(error, prompt);
+            
+            // Add error response to context
+            this.conversationContext.addMessage('assistant', errorResponse, {
+                processingTime,
+                provider: this.useCloudAPI ? 'cloud' : 'local',
+                mode: this.currentMode,
+                isError: true
+            });
+            
+            return errorResponse;
         }
     }
 
@@ -231,56 +259,46 @@ class BellaAI {
         }
     }
 
-    // Enhance prompts based on mode, using advanced LLM prompt engineering
+    // Enhance prompts based on mode and conversation context
     enhancePromptForMode(prompt, isLocal = false) {
-        const modePrompts = {
-            casual: isLocal ? 
-                `As Bella, a friendly AI assistant similar to Siri, respond to the user in a warm, conversational tone. Your response should:
-1. Be concise and helpful, like Siri's responses
-2. Use natural, flowing language with a touch of personality
-3. Be friendly but not overly emotional
-4. Maintain a helpful, slightly witty tone
-5. Sound intelligent and knowledgeable while remaining accessible
-
-User message: ${prompt}
-Bella's response:` :
-                `You are Bella, an AI assistant similar to Siri. Respond in a helpful, concise manner with a touch of personality. Keep your responses clear and direct, while maintaining a friendly tone. Avoid overly technical language unless necessary, and focus on providing value to the user.
-
-User message: ${prompt}
-Bella's response:`,
-            
-            assistant: isLocal ?
-                `As Bella, an intelligent AI assistant like Siri, provide accurate and helpful information. Your response should:
-1. Deliver clear, factual information and useful advice
-2. Organize content for easy understanding and application
-3. Maintain a professional yet approachable tone
-4. Use simple language when possible, technical terms only when necessary
-5. Demonstrate expertise while remaining accessible
-
-User question: ${prompt}
-Bella's professional response:` :
-                `You are Bella, a Siri-like AI assistant. Provide accurate, useful information and advice with a professional yet approachable tone. Organize your response clearly, avoid unnecessary technical language, and focus on being helpful and informative.
-
-User question: ${prompt}
-Bella's professional response:`,
-            
-            creative: isLocal ?
-                `As Bella, a creative AI assistant with Siri-like qualities, use your imagination to respond. Your response should:
-1. Present unique perspectives and creative thinking
-2. Use vivid, descriptive language
-3. Offer unexpected but interesting ideas
-4. Inspire the user's imagination
-5. Maintain a light, engaging tone
-
-User prompt: ${prompt}
-Bella's creative response:` :
-                `You are Bella, a creative AI assistant with Siri-like qualities. Provide interesting, unique responses using vivid language and creative thinking. Offer unexpected perspectives that inspire imagination while maintaining an engaging, helpful tone.
-
-User prompt: ${prompt}
-Bella's creative response:`
-        };
+        // Get conversation context
+        const context = this.conversationContext.getContextForThinking(true);
+        const recentHistory = context.conversationHistory.slice(-6); // Last 3 exchanges
         
-        return modePrompts[this.currentMode] || modePrompts.casual;
+        // Build context-aware prompt
+        let contextualPrompt = '';
+        
+        // Add system prompt with context
+        if (context.systemPrompt) {
+            contextualPrompt += context.systemPrompt + '\n\n';
+        }
+        
+        // Add recent conversation history for context
+        if (recentHistory.length > 0) {
+            contextualPrompt += 'Recent conversation:\n';
+            recentHistory.forEach(msg => {
+                const role = msg.role === 'user' ? 'User' : 'Bella';
+                contextualPrompt += `${role}: ${msg.content}\n`;
+            });
+            contextualPrompt += '\n';
+        }
+        
+        // Add current user message
+        contextualPrompt += `User: ${prompt}\nBella:`;
+        
+        // For local models, add mode-specific instructions
+        if (isLocal) {
+            const modeInstructions = {
+                casual: 'Respond in a warm, conversational tone with natural language.',
+                assistant: 'Provide clear, helpful information in a professional yet approachable manner.',
+                creative: 'Use creative thinking and vivid language to provide unique perspectives.'
+            };
+            
+            const instruction = modeInstructions[this.currentMode] || modeInstructions.casual;
+            contextualPrompt = `${instruction}\n\n${contextualPrompt}`;
+        }
+        
+        return contextualPrompt;
     }
 
     // Sanitize user input to prevent injection and ensure quality
@@ -435,6 +453,7 @@ Bella's creative response:`
     setChatMode(mode) {
         if (['casual', 'assistant', 'creative'].includes(mode)) {
             this.currentMode = mode;
+            this.conversationContext.setMode(mode);
             return true;
         }
         return false;
@@ -462,6 +481,7 @@ Bella's creative response:`
     // Clear conversation history
     clearHistory() {
         this.cloudAPI.clearHistory();
+        this.conversationContext.clearHistory();
     }
 
     // Get current configuration
@@ -536,6 +556,30 @@ Bella's creative response:`
             providerUsage
         };
     }
+
+    // Get conversation context information
+    getConversationContext() {
+        return this.conversationContext.getContextForThinking(false);
+    }
+
+    // Get conversation history
+    getConversationHistory(messageCount = 10) {
+        return this.conversationContext.getRecentHistory(messageCount);
+    }
+
+    // Get session statistics
+    getSessionStats() {
+        return this.conversationContext.getSessionStats();
+    }
+
+    // Start new conversation session
+    startNewSession() {
+        return this.conversationContext.startNewSession();
+    }
+
+    // Check if conversation context is still valid
+    isContextValid() {
+        return this.conversationContext.isContextValid()
 }
 
 // ES6 module export
