@@ -4,6 +4,7 @@
 import { pipeline, env, AutoTokenizer, AutoModelForSpeechSeq2Seq } from './vendor/transformers.js';
 import CloudAPIService from './cloudAPI.js';
 import { ConversationContext } from './conversationContext.js';
+import { PerformanceMonitor } from './performanceMonitor.js';
 
 // Local model configuration
 env.allowLocalModels = true;
@@ -31,6 +32,11 @@ class BellaAI {
         this.conversationContext = new ConversationContext({
             maxHistoryLength: 10,
             maxContextAge: 30 * 60 * 1000 // 30 minutes
+        });
+        this.performanceMonitor = new PerformanceMonitor({
+            responseTimeThreshold: 5000,
+            successRateThreshold: 90,
+            maxMetricsHistory: 1000
         });
     }
 
@@ -116,6 +122,18 @@ class BellaAI {
             // Log performance metrics
             this.logPerformanceMetrics(processingTime, this.useCloudAPI ? 'cloud' : 'local', true);
             
+            // Record detailed performance metrics
+            this.performanceMonitor.recordThinkingMetrics({
+                provider: this.useCloudAPI ? 'cloud' : 'local',
+                mode: this.currentMode,
+                processingTime,
+                success: true,
+                inputLength: sanitizedPrompt.length,
+                outputLength: cleanedResponse.length,
+                cacheHit: false, // TODO: Implement caching
+                retryCount: 0
+            });
+            
             return cleanedResponse;
             
         } catch (error) {
@@ -126,6 +144,18 @@ class BellaAI {
             this.logPerformanceMetrics(processingTime, this.useCloudAPI ? 'cloud' : 'local', false);
             
             const errorResponse = this.handleThinkingError(error, prompt);
+            
+            // Record error metrics
+            this.performanceMonitor.recordThinkingMetrics({
+                provider: this.useCloudAPI ? 'cloud' : 'local',
+                mode: this.currentMode,
+                processingTime,
+                success: false,
+                inputLength: prompt.length,
+                outputLength: errorResponse.length,
+                errorType: error.message.includes('timeout') ? 'timeout' : 'processing_error',
+                retryCount: 0
+            });
             
             // Add error response to context
             this.conversationContext.addMessage('assistant', errorResponse, {
@@ -590,6 +620,27 @@ class BellaAI {
     // Import conversation from backup
     importConversation(data) {
         return this.conversationContext.importConversation(data);
+    }
+
+    // Get comprehensive performance report
+    getPerformanceReport() {
+        return this.performanceMonitor.getPerformanceReport();
+    }
+
+    // Get optimization recommendations
+    getOptimizationRecommendations() {
+        return this.performanceMonitor.getOptimizationRecommendations();
+    }
+
+    // Reset performance monitoring
+    resetPerformanceMonitoring() {
+        this.performanceMonitor.reset();
+    }
+
+    // Get performance alerts
+    getPerformanceAlerts() {
+        const report = this.performanceMonitor.getPerformanceReport();
+        return report.alerts.filter(alert => !alert.resolved);
     }
 }
 

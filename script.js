@@ -44,16 +44,74 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // 设置聊天界面的AI回调函数
         if (chatInterface) {
+            let lastUserMessage = '';
+            
             chatInterface.onMessageSend = async (message) => {
+                lastUserMessage = message;
                 try {
-                    chatInterface.showTypingIndicator();
+                    chatInterface.showTypingIndicator('贝拉正在思考...');
+                    
+                    // 添加处理状态更新
+                    setTimeout(() => {
+                        chatInterface.updateThinkingStatus('正在分析您的消息...');
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        chatInterface.updateThinkingStatus('正在生成回复...');
+                    }, 2500);
+                    
                     const response = await bellaAI.think(message);
                     chatInterface.hideTypingIndicator();
                     chatInterface.addMessage('assistant', response);
                 } catch (error) {
                     console.error('AI处理错误:', error);
                     chatInterface.hideTypingIndicator();
-                    chatInterface.addMessage('assistant', '抱歉，我现在有点困惑，请稍后再试...');
+                    
+                    // 显示错误状态而不是普通消息
+                    const errorMessage = error.message.includes('timeout') 
+                        ? '思考时间过长，请稍后重试...' 
+                        : '抱歉，我现在有点困惑，请稍后再试...';
+                    
+                    chatInterface.showErrorState(errorMessage, true);
+                }
+            };
+
+            // 重试功能
+            chatInterface.onRetryLastMessage = async () => {
+                if (lastUserMessage) {
+                    chatInterface.onMessageSend(lastUserMessage);
+                }
+            };
+
+            // 模式切换功能
+            chatInterface.onModeChange = (mode) => {
+                if (bellaAI) {
+                    bellaAI.setChatMode(mode);
+                    console.log(`聊天模式已切换到: ${mode}`);
+                }
+            };
+
+            // 提供商切换功能
+            chatInterface.onProviderChange = (provider) => {
+                if (bellaAI) {
+                    bellaAI.switchProvider(provider);
+                    console.log(`AI提供商已切换到: ${provider}`);
+                }
+            };
+
+            // API密钥保存功能
+            chatInterface.onAPIKeySave = (provider, apiKey) => {
+                if (bellaAI) {
+                    bellaAI.setAPIKey(provider, apiKey);
+                    console.log(`${provider} API密钥已保存`);
+                }
+            };
+
+            // 清除历史功能
+            chatInterface.onClearHistory = () => {
+                if (bellaAI) {
+                    bellaAI.clearHistory();
+                    console.log('对话历史已清除');
                 }
             };
         }
@@ -67,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 即使AI失败，也提供基本的聊天功能
         if (chatInterface) {
             chatInterface.onMessageSend = async (message) => {
-                chatInterface.showTypingIndicator();
+                chatInterface.showTypingIndicator('系统正在启动中...');
                 setTimeout(() => {
                     chatInterface.hideTypingIndicator();
                     const fallbackResponses = [
@@ -77,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         '系统正在更新，暂时无法提供智能回复。'
                     ];
                     const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-                    chatInterface.addMessage('assistant', randomResponse);
+                    chatInterface.showErrorState(randomResponse, false);
                 }, 1000);
             };
         }
@@ -240,22 +298,84 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
 
                 try {
-                    // Let Bella think
-                    const thinkingText = document.createElement('p');
-                    thinkingText.textContent = '贝拉正在思考...';
-                    thinkingText.style.color = '#888';
-                    thinkingText.style.fontStyle = 'italic';
-                    transcriptContainer.appendChild(thinkingText);
+                    // Enhanced thinking indicator for voice
+                    const thinkingContainer = document.createElement('div');
+                    thinkingContainer.className = 'voice-thinking-container';
+                    thinkingContainer.innerHTML = `
+                        <div class="voice-thinking-status">
+                            <span class="voice-thinking-text">贝拉正在思考...</span>
+                            <div class="voice-thinking-dots">
+                                <span class="voice-dot"></span>
+                                <span class="voice-dot"></span>
+                                <span class="voice-dot"></span>
+                            </div>
+                        </div>
+                        <div class="voice-thinking-progress">
+                            <div class="voice-progress-bar"></div>
+                        </div>
+                    `;
+                    thinkingContainer.style.cssText = `
+                        margin: 10px 0;
+                        padding: 15px;
+                        background: rgba(255, 107, 157, 0.1);
+                        border-radius: 8px;
+                        border-left: 4px solid #ff6b9d;
+                    `;
+                    transcriptContainer.appendChild(thinkingContainer);
+
+                    // Start progress animation
+                    const progressBar = thinkingContainer.querySelector('.voice-progress-bar');
+                    const thinkingText = thinkingContainer.querySelector('.voice-thinking-text');
+                    
+                    progressBar.style.cssText = `
+                        height: 3px;
+                        background: linear-gradient(90deg, #ff6b9d, #ff8fab);
+                        border-radius: 2px;
+                        width: 0%;
+                        transition: width 0.3s ease;
+                        margin-top: 8px;
+                    `;
+
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += Math.random() * 15;
+                        if (progress > 90) progress = 90;
+                        progressBar.style.width = `${progress}%`;
+                    }, 200);
+
+                    // Update thinking status
+                    setTimeout(() => {
+                        thinkingText.textContent = '正在分析语音内容...';
+                    }, 1000);
+
+                    setTimeout(() => {
+                        thinkingText.textContent = '正在生成回复...';
+                    }, 2500);
                     
                     const response = await bellaAI.think(userText);
                     
-                    transcriptContainer.removeChild(thinkingText);
-                    const bellaText = document.createElement('p');
-                    bellaText.textContent = `贝拉: ${response}`;
-                    bellaText.style.color = '#ff6b9d';
-                    bellaText.style.fontWeight = 'bold';
-                    bellaText.style.marginTop = '10px';
-                    transcriptContainer.appendChild(bellaText);
+                    // Complete progress and remove thinking indicator
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        transcriptContainer.removeChild(thinkingContainer);
+                        
+                        const bellaText = document.createElement('div');
+                        bellaText.innerHTML = `
+                            <div style="
+                                background: rgba(255, 107, 157, 0.15);
+                                padding: 15px;
+                                border-radius: 8px;
+                                margin: 10px 0;
+                                border-left: 4px solid #ff6b9d;
+                            ">
+                                <strong style="color: #ff6b9d;">贝拉:</strong>
+                                <p style="margin: 8px 0 0 0; color: #2c3e50; line-height: 1.5;">${response}</p>
+                            </div>
+                        `;
+                        transcriptContainer.appendChild(bellaText);
+                    }, 300);
 
                     // 如果聊天界面已打开，也在聊天窗口中显示
                     if (chatInterface && chatInterface.getVisibility()) {
@@ -272,14 +392,52 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 } catch (error) {
                     console.error('Bella AI processing error:', error);
-                    const errorText = document.createElement('p');
-                    const errorMsg = '贝拉处理时遇到问题，但她还在努力学习中...';
-                    errorText.textContent = errorMsg;
-                    errorText.style.color = '#ff9999';
-                    transcriptContainer.appendChild(errorText);
                     
+                    // Remove thinking indicator if it exists
+                    const thinkingContainer = transcriptContainer.querySelector('.voice-thinking-container');
+                    if (thinkingContainer) {
+                        transcriptContainer.removeChild(thinkingContainer);
+                    }
+                    
+                    // Create enhanced error display
+                    const errorContainer = document.createElement('div');
+                    errorContainer.innerHTML = `
+                        <div style="
+                            background: rgba(231, 76, 60, 0.1);
+                            padding: 15px;
+                            border-radius: 8px;
+                            margin: 10px 0;
+                            border-left: 4px solid #e74c3c;
+                        ">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">⚠️</span>
+                                <strong style="color: #e74c3c;">处理错误</strong>
+                            </div>
+                            <p style="margin: 0; color: #c0392b; line-height: 1.5;">
+                                ${error.message.includes('timeout') 
+                                    ? '语音处理超时，请重新尝试...' 
+                                    : '贝拉处理时遇到问题，但她还在努力学习中...'}
+                            </p>
+                            <button onclick="this.parentElement.parentElement.remove()" style="
+                                margin-top: 10px;
+                                background: #e74c3c;
+                                color: white;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 12px;
+                            ">关闭</button>
+                        </div>
+                    `;
+                    transcriptContainer.appendChild(errorContainer);
+                    
+                    // Also show error in chat interface if visible
                     if (chatInterface && chatInterface.getVisibility()) {
-                        chatInterface.addMessage('assistant', errorMsg);
+                        const errorMsg = error.message.includes('timeout') 
+                            ? '语音处理超时，请重新尝试...' 
+                            : '贝拉处理时遇到问题，但她还在努力学习中...';
+                        chatInterface.showErrorState(errorMsg, false);
                     }
                 }
             }

@@ -81,7 +81,9 @@
 
     <div class="test-container">
         <h3>Performance Metrics</h3>
-        <button class="test-button" onclick="showMetrics()">Show Performance Metrics</button>
+        <button class="test-button" onclick="showMetrics()">Show Basic Metrics</button>
+        <button class="test-button" onclick="showDetailedPerformance()">Detailed Performance Report</button>
+        <button class="test-button" onclick="showOptimizationRecommendations()">Optimization Tips</button>
         <div id="metricsResult" class="test-result" style="display: none;"></div>
     </div>
 
@@ -188,7 +190,7 @@
             }
         };
 
-        // Show performance metrics
+        // Show basic performance metrics
         window.showMetrics = function() {
             const result = document.getElementById('metricsResult');
             
@@ -202,7 +204,7 @@
             try {
                 const metrics = bellaAI.getPerformanceMetrics();
                 result.innerHTML = `
-<strong>Performance Summary:</strong>
+<strong>Basic Performance Summary:</strong>
 Total Requests: ${metrics.summary.totalRequests}
 Average Response Time: ${metrics.summary.averageResponseTime}ms
 Success Rate: ${metrics.summary.successRate}%
@@ -210,13 +212,118 @@ Provider Usage: ${JSON.stringify(metrics.summary.providerUsage, null, 2)}
 
 <strong>Recent Metrics:</strong>
 ${metrics.metrics.slice(-5).map(m => 
-    `${m.timestamp}: ${m.processingTime}ms (${m.provider}, ${m.success ? 'success' : 'failed'})`
+    `${new Date(m.timestamp).toLocaleTimeString()}: ${m.processingTime}ms (${m.provider}, ${m.success ? 'success' : 'failed'})`
 ).join('\n')}
                 `;
                 result.className = 'test-result info';
                 result.style.display = 'block';
             } catch (error) {
                 result.textContent = `Error getting metrics: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show detailed performance report
+        window.showDetailedPerformance = function() {
+            const result = document.getElementById('metricsResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const report = bellaAI.getPerformanceReport();
+                result.innerHTML = `
+<strong>Detailed Performance Report:</strong>
+
+<strong>Summary:</strong>
+• Total Operations: ${report.summary.totalOperations}
+• Recent Operations: ${report.summary.recentOperations}
+• Average Response Time: ${Math.round(report.summary.averageResponseTime)}ms
+• Success Rate: ${Math.round(report.summary.successRate)}%
+• Cache Hit Rate: ${report.summary.cacheHitRate}%
+• Active Alerts: ${report.summary.activeAlerts}
+
+<strong>System Health:</strong>
+• Memory Used: ${report.systemHealth.memory ? Math.round(report.systemHealth.memory.used / 1024 / 1024) + 'MB' : 'N/A'}
+• Uptime: ${Math.round(report.systemHealth.uptime / 1000)}s
+• Cache Size: ${report.systemHealth.cacheSize} items
+
+<strong>Optimization Status:</strong>
+• Adaptive Timeout: ${report.optimization.adaptiveTimeout ? 'Enabled' : 'Disabled'}
+• Current Timeout: ${report.optimization.currentTimeout}ms
+• Dynamic Provider Selection: ${report.optimization.dynamicProviderSelection ? 'Enabled' : 'Disabled'}
+• Cache Enabled: ${report.optimization.cacheEnabled ? 'Yes' : 'No'}
+
+<strong>Performance Trends:</strong>
+${report.trends ? `
+Response Time: ${report.trends.responseTime.trend} (${report.trends.responseTime.changePercent.toFixed(1)}%)
+Success Rate: ${report.trends.successRate.trend} (${report.trends.successRate.changePercent.toFixed(1)}%)
+` : 'Not enough data for trends'}
+
+<strong>Recent Alerts:</strong>
+${report.alerts.length > 0 ? report.alerts.map(alert => 
+    `${new Date(alert.timestamp).toLocaleTimeString()}: ${alert.type} (${alert.severity})`
+).join('\n') : 'No recent alerts'}
+                `;
+                result.className = 'test-result info';
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting detailed report: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show optimization recommendations
+        window.showOptimizationRecommendations = function() {
+            const result = document.getElementById('metricsResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const recommendations = bellaAI.getOptimizationRecommendations();
+                
+                if (recommendations.length === 0) {
+                    result.innerHTML = `
+<strong>Optimization Recommendations:</strong>
+
+🎉 Great job! Your system is performing optimally.
+No specific recommendations at this time.
+
+Keep monitoring performance metrics to maintain optimal operation.
+                    `;
+                    result.className = 'test-result success';
+                } else {
+                    result.innerHTML = `
+<strong>Optimization Recommendations:</strong>
+
+${recommendations.map((rec, index) => `
+${index + 1}. [${rec.priority.toUpperCase()}] ${rec.type}
+   ${rec.message}
+   Action: ${rec.action}
+`).join('\n')}
+
+<strong>Performance Alerts:</strong>
+${bellaAI.getPerformanceAlerts().map(alert => 
+    `⚠️ ${alert.type}: ${JSON.stringify(alert.data)}`
+).join('\n') || 'No active alerts'}
+                    `;
+                    result.className = 'test-result info';
+                }
+                
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting recommendations: ${error.message}`;
                 result.className = 'test-result error';
                 result.style.display = 'block';
             }
