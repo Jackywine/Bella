@@ -297,8 +297,7 @@ class BellaAI {
 
     // Get available cloud providers that are configured
     getAvailableCloudProviders() {
-        const providers = ['openai', 'qwen', 'ernie', 'glm'];
-        return providers.filter(provider => this.cloudAPI.isConfigured(provider));
+        return this.cloudAPI.getConfiguredProviders();
     }
 
     // Create comprehensive error message for complete failure

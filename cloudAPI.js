@@ -494,13 +494,26 @@ Always maintain this warm, elegant, and authentic personality, helping users fee
         if (!config) return false;
         
         if (provider === 'ernie') {
-            return !!config.accessToken;
+            return !!config.accessToken && config.accessToken !== 'YOUR_ERNIE_ACCESS_TOKEN';
         } else {
             return config.headers['Authorization'] && 
                    config.headers['Authorization'] !== 'Bearer YOUR_OPENAI_API_KEY' &&
                    config.headers['Authorization'] !== 'Bearer YOUR_QWEN_API_KEY' &&
-                   config.headers['Authorization'] !== 'Bearer YOUR_GLM_API_KEY';
+                   config.headers['Authorization'] !== 'Bearer YOUR_GLM_API_KEY' &&
+                   !config.headers['Authorization'].includes('YOUR_') &&
+                   config.headers['Authorization'].length > 20; // Basic validation for key length
         }
+    }
+
+    // Get list of all configured providers
+    getConfiguredProviders() {
+        const providers = Object.keys(this.apiConfigs);
+        return providers.filter(provider => this.isConfigured(provider));
+    }
+
+    // Get list of all available providers (configured or not)
+    getAvailableProviders() {
+        return Object.keys(this.apiConfigs);
     }
 }
 
