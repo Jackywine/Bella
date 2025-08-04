@@ -122,6 +122,9 @@ class ChatInterface {
                         <option value="assistant">智能助手</option>
                         <option value="creative">创意伙伴</option>
                     </select>
+                    <div class="bella-mode-description">
+                        <small id="modeDescription">选择不同的聊天模式来改变贝拉的回应风格</small>
+                    </div>
                 </div>
                 <div class="bella-setting-group">
                     <button class="bella-clear-history">清除聊天记录</button>
@@ -203,6 +206,26 @@ class ChatInterface {
                 this.onAPIKeySave?.(provider, apiKey.trim());
                 this.showNotification('API密钥已保存', 'success');
             }
+        });
+
+        // 模式选择
+        const modeSelect = this.settingsPanel.querySelector('.bella-mode-select');
+        const modeDescription = this.settingsPanel.querySelector('#modeDescription');
+        
+        modeSelect.addEventListener('change', (e) => {
+            const mode = e.target.value;
+            
+            // 更新模式描述
+            const descriptions = {
+                casual: '轻松聊天模式：贝拉会以温暖、友好的方式与你对话',
+                assistant: '智能助手模式：贝拉会提供专业、准确的信息和建议',
+                creative: '创意伙伴模式：贝拉会发挥想象力，提供独特的创意观点'
+            };
+            modeDescription.textContent = descriptions[mode] || descriptions.casual;
+            
+            // 触发模式切换事件
+            this.onModeChange?.(mode);
+            this.showNotification(`已切换到${modeSelect.options[modeSelect.selectedIndex].text}模式`, 'success');
         });
 
         // 清除聊天记录
@@ -351,7 +374,7 @@ class ChatInterface {
     }
 
     // 显示打字指示器
-    showTypingIndicator() {
+    showTypingIndicator(message = '贝拉正在思考...') {
         const existingIndicator = this.messageContainer.querySelector('.bella-typing-indicator');
         if (existingIndicator) return;
 
@@ -360,10 +383,16 @@ class ChatInterface {
         typingElement.innerHTML = `
             <div class="bella-message-avatar">💝</div>
             <div class="bella-message-content">
-                <div class="bella-typing-dots">
-                    <span class="bella-typing-dot"></span>
-                    <span class="bella-typing-dot"></span>
-                    <span class="bella-typing-dot"></span>
+                <div class="bella-thinking-status">
+                    <span class="bella-thinking-text">${message}</span>
+                    <div class="bella-typing-dots">
+                        <span class="bella-typing-dot"></span>
+                        <span class="bella-typing-dot"></span>
+                        <span class="bella-typing-dot"></span>
+                    </div>
+                </div>
+                <div class="bella-thinking-progress">
+                    <div class="bella-progress-bar"></div>
                 </div>
             </div>
         `;
@@ -375,13 +404,65 @@ class ChatInterface {
         setTimeout(() => {
             typingElement.classList.add('bella-typing-show');
         }, 10);
+
+        // 启动进度条动画
+        this.startProgressAnimation(typingElement);
+    }
+
+    // 启动进度条动画
+    startProgressAnimation(typingElement) {
+        const progressBar = typingElement.querySelector('.bella-progress-bar');
+        if (!progressBar) return;
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90; // 不要到100%，等实际完成
+            
+            progressBar.style.width = `${progress}%`;
+            
+            // 如果元素被移除了，清除定时器
+            if (!document.body.contains(typingElement)) {
+                clearInterval(interval);
+            }
+        }, 200);
+
+        // 存储定时器引用以便清理
+        typingElement._progressInterval = interval;
+    }
+
+    // 更新思考状态
+    updateThinkingStatus(message) {
+        const indicator = this.messageContainer.querySelector('.bella-typing-indicator');
+        if (indicator) {
+            const textElement = indicator.querySelector('.bella-thinking-text');
+            if (textElement) {
+                textElement.textContent = message;
+            }
+        }
     }
 
     // 隐藏打字指示器
     hideTypingIndicator() {
         const indicator = this.messageContainer.querySelector('.bella-typing-indicator');
         if (indicator) {
-            this.messageContainer.removeChild(indicator);
+            // 清理进度条定时器
+            if (indicator._progressInterval) {
+                clearInterval(indicator._progressInterval);
+            }
+            
+            // 完成进度条动画
+            const progressBar = indicator.querySelector('.bella-progress-bar');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            
+            // 延迟移除以显示完成状态
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    this.messageContainer.removeChild(indicator);
+                }
+            }, 300);
         }
     }
 
@@ -430,11 +511,70 @@ class ChatInterface {
         return this.isVisible;
     }
 
+    // 显示错误状态
+    showErrorState(errorMessage, canRetry = true) {
+        const errorElement = document.createElement('div');
+        errorElement.className = 'bella-message bella-message-error';
+        
+        const timestamp = new Date().toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        errorElement.innerHTML = `
+            <div class="bella-message-avatar">⚠️</div>
+            <div class="bella-message-content">
+                <div class="bella-error-content">
+                    <div class="bella-error-message">${errorMessage}</div>
+                    ${canRetry ? '<button class="bella-retry-button">重试</button>' : ''}
+                </div>
+                <div class="bella-message-time">${timestamp}</div>
+            </div>
+        `;
+
+        // 添加重试功能
+        if (canRetry) {
+            const retryButton = errorElement.querySelector('.bella-retry-button');
+            retryButton.addEventListener('click', () => {
+                this.onRetryLastMessage?.();
+                this.messageContainer.removeChild(errorElement);
+            });
+        }
+
+        this.messageContainer.appendChild(errorElement);
+        this.scrollToBottom();
+
+        // 添加动画效果
+        setTimeout(() => {
+            errorElement.classList.add('bella-message-appear');
+        }, 10);
+    }
+
+    // 获取当前聊天模式
+    getCurrentMode() {
+        const modeSelect = this.settingsPanel.querySelector('.bella-mode-select');
+        return modeSelect ? modeSelect.value : 'casual';
+    }
+
+    // 设置聊天模式
+    setMode(mode) {
+        const modeSelect = this.settingsPanel.querySelector('.bella-mode-select');
+        if (modeSelect && ['casual', 'assistant', 'creative'].includes(mode)) {
+            modeSelect.value = mode;
+            
+            // 触发change事件以更新描述
+            const event = new Event('change');
+            modeSelect.dispatchEvent(event);
+        }
+    }
+
     // 设置回调函数
     onMessageSend = null;
     onProviderChange = null;
     onAPIKeySave = null;
     onClearHistory = null;
+    onModeChange = null;
+    onRetryLastMessage = null;
 }
 
 // ES6模块导出

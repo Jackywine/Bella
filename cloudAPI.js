@@ -109,44 +109,135 @@ Always maintain this warm, elegant, and authentic personality, helping users fee
         };
     }
 
-    // Call cloud API for conversation
-    async chat(userMessage) {
+    // Call cloud API for conversation with comprehensive error handling
+    async chat(enhancedPrompt, conversationContext = null) {
         const config = this.apiConfigs[this.currentProvider];
         if (!config) {
             throw new Error(`Unsupported AI service provider: ${this.currentProvider}`);
         }
 
-        // Add user message to history
-        this.addToHistory('user', userMessage);
+        // Validate configuration before making request
+        if (!this.isConfigured(this.currentProvider)) {
+            throw new Error(`${this.currentProvider} API not properly configured - missing or invalid API key`);
+        }
 
         try {
             let response;
             
-            switch (this.currentProvider) {
-                case 'openai':
-                    response = await this.callOpenAI(userMessage);
-                    break;
-                case 'qwen':
-                    response = await this.callQwen(userMessage);
-                    break;
-                case 'ernie':
-                    response = await this.callErnie(userMessage);
-                    break;
-                case 'glm':
-                    response = await this.callGLM(userMessage);
-                    break;
-                default:
-                    throw new Error(`Unimplemented AI service provider: ${this.currentProvider}`);
+            // Use enhanced prompt directly if provided, otherwise fall back to legacy behavior
+            if (enhancedPrompt && typeof enhancedPrompt === 'string' && enhancedPrompt.includes('User:')) {
+                // Enhanced prompt with context - use directly
+                switch (this.currentProvider) {
+                    case 'openai':
+                        response = await this.callOpenAIWithContext(enhancedPrompt);
+                        break;
+                    case 'qwen':
+                        response = await this.callQwenWithContext(enhancedPrompt);
+                        break;
+                    case 'ernie':
+                        response = await this.callErnieWithContext(enhancedPrompt);
+                        break;
+                    case 'glm':
+                        response = await this.callGLMWithContext(enhancedPrompt);
+                        break;
+                    default:
+                        throw new Error(`Unimplemented AI service provider: ${this.currentProvider}`);
+                }
+            } else {
+                // Legacy behavior for backward compatibility
+                this.addToHistory('user', enhancedPrompt);
+                
+                switch (this.currentProvider) {
+                    case 'openai':
+                        response = await this.callOpenAI(enhancedPrompt);
+                        break;
+                    case 'qwen':
+                        response = await this.callQwen(enhancedPrompt);
+                        break;
+                    case 'ernie':
+                        response = await this.callErnie(enhancedPrompt);
+                        break;
+                    case 'glm':
+                        response = await this.callGLM(enhancedPrompt);
+                        break;
+                    default:
+                        throw new Error(`Unimplemented AI service provider: ${this.currentProvider}`);
+                }
+                
+                this.addToHistory('assistant', response);
             }
 
-            // Add AI response to history
-            this.addToHistory('assistant', response);
+            // Validate response quality
+            if (!response || typeof response !== 'string' || response.trim().length === 0) {
+                throw new Error(`${this.currentProvider} API returned empty or invalid response`);
+            }
+
             return response;
             
         } catch (error) {
             console.error(`Cloud API call failed (${this.currentProvider}):`, error);
-            throw error;
+            
+            // Enhance error with provider-specific context
+            const enhancedError = this.enhanceCloudAPIError(error, this.currentProvider);
+            throw enhancedError;
         }
+    }
+
+    // Enhance cloud API errors with more specific information
+    enhanceCloudAPIError(error, provider) {
+        const originalMessage = error.message;
+        
+        // Network and connection errors
+        if (originalMessage.includes('fetch') || originalMessage.includes('network') || originalMessage.includes('ENOTFOUND')) {
+            return new Error(`Network error connecting to ${provider} API - check internet connection`);
+        }
+        
+        // HTTP status code errors
+        if (originalMessage.includes('401')) {
+            return new Error(`${provider} API authentication failed - invalid API key`);
+        }
+        
+        if (originalMessage.includes('403')) {
+            return new Error(`${provider} API access forbidden - check API key permissions`);
+        }
+        
+        if (originalMessage.includes('429')) {
+            return new Error(`${provider} API rate limit exceeded - too many requests`);
+        }
+        
+        if (originalMessage.includes('500') || originalMessage.includes('502') || originalMessage.includes('503') || originalMessage.includes('504')) {
+            return new Error(`${provider} API server error - service temporarily unavailable`);
+        }
+        
+        // Provider-specific error handling
+        if (provider === 'openai' && originalMessage.includes('model')) {
+            return new Error(`OpenAI model error - requested model may not be available`);
+        }
+        
+        if (provider === 'qwen' && originalMessage.includes('quota')) {
+            return new Error(`Qwen API quota exceeded - usage limit reached`);
+        }
+        
+        if (provider === 'ernie' && originalMessage.includes('access_token')) {
+            return new Error(`ERNIE Bot access token invalid or expired`);
+        }
+        
+        if (provider === 'glm' && originalMessage.includes('balance')) {
+            return new Error(`GLM API insufficient balance - account needs recharge`);
+        }
+        
+        // Timeout errors
+        if (originalMessage.includes('timeout')) {
+            return new Error(`${provider} API request timed out - service may be overloaded`);
+        }
+        
+        // JSON parsing errors
+        if (originalMessage.includes('JSON') || originalMessage.includes('parse')) {
+            return new Error(`${provider} API returned malformed response - service may be experiencing issues`);
+        }
+        
+        // Return enhanced error with original message if no specific pattern matched
+        return new Error(`${provider} API error: ${originalMessage}`);
     }
 
     // OpenAI API call, optimized parameters for more natural, personalized responses
@@ -289,19 +380,140 @@ Always maintain this warm, elegant, and authentic personality, helping users fee
         };
     }
 
+    // OpenAI API call with enhanced context
+    async callOpenAIWithContext(enhancedPrompt) {
+        const config = this.apiConfigs.openai;
+        
+        const response = await fetch(config.baseURL, {
+            method: 'POST',
+            headers: config.headers,
+            body: JSON.stringify({
+                model: config.model,
+                messages: [{ role: 'user', content: enhancedPrompt }],
+                max_tokens: 250,
+                temperature: 0.75,
+                top_p: 0.92,
+                presence_penalty: 0.3,
+                frequency_penalty: 0.5,
+                stop: ["User:", "Human:"]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+    }
+
+    // Qwen API call with enhanced context
+    async callQwenWithContext(enhancedPrompt) {
+        const config = this.apiConfigs.qwen;
+        
+        const response = await fetch(config.baseURL, {
+            method: 'POST',
+            headers: config.headers,
+            body: JSON.stringify({
+                model: config.model,
+                input: {
+                    messages: [{ role: 'user', content: enhancedPrompt }]
+                },
+                parameters: {
+                    max_tokens: 250,
+                    temperature: 0.75,
+                    top_p: 0.92,
+                    repetition_penalty: 1.1,
+                    result_format: 'message'
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Qwen API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.output.text.trim();
+    }
+
+    // ERNIE Bot API call with enhanced context
+    async callErnieWithContext(enhancedPrompt) {
+        const config = this.apiConfigs.ernie;
+        const url = `${config.baseURL}?access_token=${config.accessToken}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: config.headers,
+            body: JSON.stringify({
+                messages: [{ role: 'user', content: enhancedPrompt }],
+                temperature: 0.75,
+                top_p: 0.92,
+                max_output_tokens: 250,
+                penalty_score: 1.1
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`ERNIE Bot API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.result.trim();
+    }
+
+    // Zhipu AI GLM API call with enhanced context
+    async callGLMWithContext(enhancedPrompt) {
+        const config = this.apiConfigs.glm;
+        
+        const response = await fetch(config.baseURL, {
+            method: 'POST',
+            headers: config.headers,
+            body: JSON.stringify({
+                model: config.model,
+                messages: [{ role: 'user', content: enhancedPrompt }],
+                max_tokens: 250,
+                temperature: 0.75,
+                top_p: 0.92,
+                frequency_penalty: 1.05,
+                presence_penalty: 0.3
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Zhipu AI API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+    }
+
     // Check if API configuration is complete
     isConfigured(provider = this.currentProvider) {
         const config = this.apiConfigs[provider];
         if (!config) return false;
         
         if (provider === 'ernie') {
-            return !!config.accessToken;
+            return !!config.accessToken && config.accessToken !== 'YOUR_ERNIE_ACCESS_TOKEN';
         } else {
             return config.headers['Authorization'] && 
                    config.headers['Authorization'] !== 'Bearer YOUR_OPENAI_API_KEY' &&
                    config.headers['Authorization'] !== 'Bearer YOUR_QWEN_API_KEY' &&
-                   config.headers['Authorization'] !== 'Bearer YOUR_GLM_API_KEY';
+                   config.headers['Authorization'] !== 'Bearer YOUR_GLM_API_KEY' &&
+                   !config.headers['Authorization'].includes('YOUR_') &&
+                   config.headers['Authorization'].length > 20; // Basic validation for key length
         }
+    }
+
+    // Get list of all configured providers
+    getConfiguredProviders() {
+        const providers = Object.keys(this.apiConfigs);
+        return providers.filter(provider => this.isConfigured(provider));
+    }
+
+    // Get list of all available providers (configured or not)
+    getAvailableProviders() {
+        return Object.keys(this.apiConfigs);
     }
 }
 

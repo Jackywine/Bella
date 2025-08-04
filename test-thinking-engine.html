@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella AI Thinking Engine Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .test-button {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #e55a8a;
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .test-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .metrics {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Bella AI Thinking Engine Test</h1>
+    
+    <div class="test-container">
+        <h3>Test Enhanced Think() Method</h3>
+        <input type="text" class="test-input" id="testInput" placeholder="Enter a message to test Bella's thinking..." value="Hello Bella, how are you today?">
+        <button class="test-button" id="testButton" onclick="testThinking()">Test Thinking</button>
+        <div id="testResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Performance Metrics</h3>
+        <button class="test-button" onclick="showMetrics()">Show Basic Metrics</button>
+        <button class="test-button" onclick="showDetailedPerformance()">Detailed Performance Report</button>
+        <button class="test-button" onclick="showOptimizationRecommendations()">Optimization Tips</button>
+        <div id="metricsResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Conversation Context Test</h3>
+        <button class="test-button" onclick="testConversationContext()">Test Context Management</button>
+        <div id="contextResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Session Management</h3>
+        <button class="test-button" onclick="showSessionStats()">Show Session Stats</button>
+        <button class="test-button" onclick="clearConversation()">Clear History</button>
+        <button class="test-button" onclick="startNewSession()">New Session</button>
+        <div id="sessionResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Error Handling Tests</h3>
+        <button class="test-button" onclick="testErrorHandling()">Test Error Handling</button>
+        <div id="errorResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Initialization Status</h3>
+        <div id="initStatus" class="test-result info">Initializing Bella AI...</div>
+    </div>
+
+    <script type="module">
+        import { BellaAI } from './core.js';
+
+        let bellaAI = null;
+        let initializationComplete = false;
+
+        // Initialize Bella AI
+        async function initializeBella() {
+            try {
+                const initStatus = document.getElementById('initStatus');
+                initStatus.textContent = 'Initializing Bella AI...';
+                initStatus.className = 'test-result info';
+
+                bellaAI = await BellaAI.getInstance();
+                
+                initStatus.textContent = 'Bella AI initialized successfully! ✅\nThinking engine is ready for testing.';
+                initStatus.className = 'test-result success';
+                initializationComplete = true;
+
+                // Enable test buttons
+                document.getElementById('testButton').disabled = false;
+                
+            } catch (error) {
+                const initStatus = document.getElementById('initStatus');
+                initStatus.textContent = `Initialization failed: ${error.message}\nSome features may not work properly.`;
+                initStatus.className = 'test-result error';
+                console.error('Bella AI initialization error:', error);
+            }
+        }
+
+        // Test thinking functionality
+        window.testThinking = async function() {
+            const input = document.getElementById('testInput').value.trim();
+            const result = document.getElementById('testResult');
+            const button = document.getElementById('testButton');
+
+            if (!input) {
+                result.textContent = 'Please enter a message to test.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet. Please wait...';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Thinking...';
+            
+            try {
+                const startTime = Date.now();
+                const response = await bellaAI.think(input);
+                const endTime = Date.now();
+                const processingTime = endTime - startTime;
+
+                result.innerHTML = `
+<strong>Input:</strong> ${input}
+<strong>Response:</strong> ${response}
+<div class="metrics">Processing time: ${processingTime}ms</div>
+                `;
+                result.className = 'test-result success';
+                result.style.display = 'block';
+
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                console.error('Thinking test error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Thinking';
+            }
+        };
+
+        // Show basic performance metrics
+        window.showMetrics = function() {
+            const result = document.getElementById('metricsResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const metrics = bellaAI.getPerformanceMetrics();
+                result.innerHTML = `
+<strong>Basic Performance Summary:</strong>
+Total Requests: ${metrics.summary.totalRequests}
+Average Response Time: ${metrics.summary.averageResponseTime}ms
+Success Rate: ${metrics.summary.successRate}%
+Provider Usage: ${JSON.stringify(metrics.summary.providerUsage, null, 2)}
+
+<strong>Recent Metrics:</strong>
+${metrics.metrics.slice(-5).map(m => 
+    `${new Date(m.timestamp).toLocaleTimeString()}: ${m.processingTime}ms (${m.provider}, ${m.success ? 'success' : 'failed'})`
+).join('\n')}
+                `;
+                result.className = 'test-result info';
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting metrics: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show detailed performance report
+        window.showDetailedPerformance = function() {
+            const result = document.getElementById('metricsResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const report = bellaAI.getPerformanceReport();
+                result.innerHTML = `
+<strong>Detailed Performance Report:</strong>
+
+<strong>Summary:</strong>
+• Total Operations: ${report.summary.totalOperations}
+• Recent Operations: ${report.summary.recentOperations}
+• Average Response Time: ${Math.round(report.summary.averageResponseTime)}ms
+• Success Rate: ${Math.round(report.summary.successRate)}%
+• Cache Hit Rate: ${report.summary.cacheHitRate}%
+• Active Alerts: ${report.summary.activeAlerts}
+
+<strong>System Health:</strong>
+• Memory Used: ${report.systemHealth.memory ? Math.round(report.systemHealth.memory.used / 1024 / 1024) + 'MB' : 'N/A'}
+• Uptime: ${Math.round(report.systemHealth.uptime / 1000)}s
+• Cache Size: ${report.systemHealth.cacheSize} items
+
+<strong>Optimization Status:</strong>
+• Adaptive Timeout: ${report.optimization.adaptiveTimeout ? 'Enabled' : 'Disabled'}
+• Current Timeout: ${report.optimization.currentTimeout}ms
+• Dynamic Provider Selection: ${report.optimization.dynamicProviderSelection ? 'Enabled' : 'Disabled'}
+• Cache Enabled: ${report.optimization.cacheEnabled ? 'Yes' : 'No'}
+
+<strong>Performance Trends:</strong>
+${report.trends ? `
+Response Time: ${report.trends.responseTime.trend} (${report.trends.responseTime.changePercent.toFixed(1)}%)
+Success Rate: ${report.trends.successRate.trend} (${report.trends.successRate.changePercent.toFixed(1)}%)
+` : 'Not enough data for trends'}
+
+<strong>Recent Alerts:</strong>
+${report.alerts.length > 0 ? report.alerts.map(alert => 
+    `${new Date(alert.timestamp).toLocaleTimeString()}: ${alert.type} (${alert.severity})`
+).join('\n') : 'No recent alerts'}
+                `;
+                result.className = 'test-result info';
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting detailed report: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show optimization recommendations
+        window.showOptimizationRecommendations = function() {
+            const result = document.getElementById('metricsResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const recommendations = bellaAI.getOptimizationRecommendations();
+                
+                if (recommendations.length === 0) {
+                    result.innerHTML = `
+<strong>Optimization Recommendations:</strong>
+
+🎉 Great job! Your system is performing optimally.
+No specific recommendations at this time.
+
+Keep monitoring performance metrics to maintain optimal operation.
+                    `;
+                    result.className = 'test-result success';
+                } else {
+                    result.innerHTML = `
+<strong>Optimization Recommendations:</strong>
+
+${recommendations.map((rec, index) => `
+${index + 1}. [${rec.priority.toUpperCase()}] ${rec.type}
+   ${rec.message}
+   Action: ${rec.action}
+`).join('\n')}
+
+<strong>Performance Alerts:</strong>
+${bellaAI.getPerformanceAlerts().map(alert => 
+    `⚠️ ${alert.type}: ${JSON.stringify(alert.data)}`
+).join('\n') || 'No active alerts'}
+                    `;
+                    result.className = 'test-result info';
+                }
+                
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting recommendations: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Test error handling
+        window.testErrorHandling = async function() {
+            const result = document.getElementById('errorResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            const tests = [
+                { name: 'Empty input', input: '' },
+                { name: 'Null input', input: null },
+                { name: 'Very long input', input: 'a'.repeat(2000) },
+                { name: 'Special characters', input: '<script>alert("test")</script>' }
+            ];
+
+            let results = 'Error Handling Test Results:\n\n';
+            
+            for (const test of tests) {
+                try {
+                    const response = await bellaAI.think(test.input);
+                    results += `✅ ${test.name}: Handled gracefully\n   Response: ${response.substring(0, 100)}...\n\n`;
+                } catch (error) {
+                    results += `❌ ${test.name}: ${error.message}\n\n`;
+                }
+            }
+
+            result.textContent = results;
+            result.className = 'test-result info';
+            result.style.display = 'block';
+        };
+
+        // Test conversation context
+        window.testConversationContext = async function() {
+            const result = document.getElementById('contextResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                // Test conversation flow
+                const messages = [
+                    "Hi, my name is John",
+                    "What's my name?",
+                    "I like pizza",
+                    "What food do I like?"
+                ];
+
+                let results = 'Conversation Context Test:\n\n';
+                
+                for (let i = 0; i < messages.length; i++) {
+                    const response = await bellaAI.think(messages[i]);
+                    results += `${i + 1}. User: ${messages[i]}\n   Bella: ${response}\n\n`;
+                    
+                    // Add delay between messages
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+
+                // Show context information
+                const context = bellaAI.getConversationContext();
+                results += `Context Summary: ${context.contextSummary}\n`;
+                results += `Keywords: ${context.contextKeywords.join(', ')}\n`;
+                results += `Session ID: ${context.sessionId}\n`;
+
+                result.textContent = results;
+                result.className = 'test-result success';
+                result.style.display = 'block';
+
+            } catch (error) {
+                result.textContent = `Context test error: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show session statistics
+        window.showSessionStats = function() {
+            const result = document.getElementById('sessionResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const stats = bellaAI.getSessionStats();
+                const history = bellaAI.getConversationHistory(5);
+                
+                result.innerHTML = `
+<strong>Session Statistics:</strong>
+Session ID: ${stats.sessionId}
+Duration: ${Math.round(stats.duration / 1000)}s
+Message Count: ${stats.messageCount}
+Average Response Time: ${stats.averageResponseTime}ms
+Context Keywords: ${stats.contextKeywords}
+User Preferences: ${stats.userPreferences}
+Current Mode: ${stats.currentMode}
+Is Active: ${stats.isActive}
+
+<strong>Recent History (${history.length} messages):</strong>
+${history.map(msg => `${msg.role}: ${msg.content.substring(0, 50)}...`).join('\n')}
+                `;
+                result.className = 'test-result info';
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting session stats: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Clear conversation history
+        window.clearConversation = function() {
+            if (!initializationComplete || !bellaAI) {
+                return;
+            }
+
+            bellaAI.clearHistory();
+            const result = document.getElementById('sessionResult');
+            result.textContent = 'Conversation history cleared successfully!';
+            result.className = 'test-result success';
+            result.style.display = 'block';
+        };
+
+        // Start new session
+        window.startNewSession = function() {
+            if (!initializationComplete || !bellaAI) {
+                return;
+            }
+
+            const newSessionId = bellaAI.startNewSession();
+            const result = document.getElementById('sessionResult');
+            result.textContent = `New session started: ${newSessionId}`;
+            result.className = 'test-result success';
+            result.style.display = 'block';
+        };
+
+        // Initialize on page load
+        initializeBella();
+
+        // Disable test button initially
+        document.getElementById('testButton').disabled = true;
+    </script>
+</body>
+</html>
+</script>

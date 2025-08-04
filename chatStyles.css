@@ -976,4 +976,224 @@
     .bella-chat-input-container {
         padding: 16px;
     }
+}/*
+ Enhanced Thinking Indicator Styles */
+.bella-thinking-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.bella-thinking-text {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+.bella-thinking-progress {
+    width: 100%;
+    height: 3px;
+    background: #f0f0f0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.bella-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b9d, #ff8fab);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Enhanced Typing Dots */
+.bella-typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.bella-typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #ff6b9d;
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.bella-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.bella-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.bella-typing-dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typing-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Error State Styles */
+.bella-message-error {
+    border-left: 4px solid #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
+
+.bella-message-error .bella-message-avatar {
+    background: #e74c3c;
+    color: white;
+}
+
+.bella-error-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bella-error-message {
+    color: #c0392b;
+    font-weight: 500;
+}
+
+.bella-retry-button {
+    align-self: flex-start;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.bella-retry-button:hover {
+    background: #c0392b;
+}
+
+/* Mode Selection Enhancements */
+.bella-mode-description {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255, 107, 157, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid #ff6b9d;
+}
+
+.bella-mode-description small {
+    color: #666;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Enhanced Settings Panel */
+.bella-setting-group {
+    margin-bottom: 20px;
+}
+
+.bella-setting-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.bella-setting-group select,
+.bella-setting-group input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ecf0f1;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.bella-setting-group select:focus,
+.bella-setting-group input:focus {
+    outline: none;
+    border-color: #ff6b9d;
+    box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+}
+
+/* Notification Enhancements */
+.bella-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bella-notification-show {
+    transform: translateX(0);
+}
+
+.bella-notification-success {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.bella-notification-error {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.bella-notification-info {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+    .bella-chat-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        bottom: 0;
+        right: 0;
+    }
+    
+    .bella-thinking-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .bella-thinking-text {
+        font-size: 13px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .bella-thinking-text {
+        color: #bbb;
+    }
+    
+    .bella-thinking-progress {
+        background: #333;
+    }
+    
+    .bella-mode-description {
+        background: rgba(255, 107, 157, 0.15);
+    }
+    
+    .bella-mode-description small {
+        color: #ccc;
+    }
 }
