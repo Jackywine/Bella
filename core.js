@@ -465,17 +465,22 @@ class BellaAI {
         }
     }
 
-    // Think using local model with optimized LLM parameters and processing
+    // Think using local model with comprehensive error handling and processing
     async thinkWithLocalModel(prompt) {
         if (!this.llm) {
-            throw new Error('Local LLM model not initialized');
+            throw new Error('Local LLM model not initialized - model failed to load during startup');
         }
         
         try {
             const bellaPrompt = this.enhancePromptForMode(prompt, true);
             
-            // Optimized LLM parameters for better responses
-            const result = await this.llm(bellaPrompt, {
+            // Validate prompt length to prevent memory issues
+            if (bellaPrompt.length > 2000) {
+                throw new Error('Prompt too long for local model processing');
+            }
+            
+            // Add timeout for local model processing
+            const processingPromise = this.llm(bellaPrompt, {
                 max_new_tokens: 200,      // Increased for more complete responses
                 temperature: 0.75,        // Balanced creativity and consistency
                 top_k: 50,               // Diverse vocabulary selection
@@ -486,12 +491,23 @@ class BellaAI {
                 eos_token_id: 1,         // Proper end-of-sequence handling
             });
             
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Local model processing timeout - computation took too long')), 8000); // 8 second timeout
+            });
+            
+            const result = await Promise.race([processingPromise, timeoutPromise]);
+            
             if (!result || !result[0] || !result[0].generated_text) {
-                throw new Error('Local model returned invalid result');
+                throw new Error('Local model returned invalid or empty result structure');
             }
             
             // Enhanced text cleaning and processing
             let response = result[0].generated_text;
+            
+            // Validate initial response
+            if (typeof response !== 'string') {
+                throw new Error('Local model returned non-string response');
+            }
             
             // Remove prompt part more robustly
             const promptIndex = response.indexOf(bellaPrompt);
@@ -509,17 +525,64 @@ class BellaAI {
                 response = sentences.join('.') + (sentences.length > 0 ? '.' : '');
             }
             
+            // Remove common artifacts and clean up
+            response = response
+                .replace(/\[INST\].*?\[\/INST\]/g, '') // Remove instruction tokens
+                .replace(/\<\|.*?\|\>/g, '') // Remove special tokens
+                .replace(/^\s*[-*•]\s*/, '') // Remove bullet points at start
+                .trim();
+            
             // Final validation
             if (!response || response.length < 3) {
-                throw new Error('Generated response too short after processing');
+                throw new Error('Generated response too short after cleaning and processing');
+            }
+            
+            // Check for repetitive content
+            if (this.isResponseRepetitive(response)) {
+                throw new Error('Local model generated repetitive content');
             }
             
             return response.trim();
             
         } catch (error) {
             console.error('Local model processing error:', error);
-            throw new Error(`Local model failed: ${error.message}`);
+            
+            // Enhance error message with more specific information
+            let enhancedError = error.message;
+            
+            if (error.message.includes('timeout')) {
+                enhancedError = 'Local model processing timed out - computation too complex';
+            } else if (error.message.includes('memory') || error.message.includes('allocation')) {
+                enhancedError = 'Local model ran out of memory - prompt may be too complex';
+            } else if (error.message.includes('invalid result')) {
+                enhancedError = 'Local model produced malformed output';
+            } else if (error.message.includes('repetitive')) {
+                enhancedError = 'Local model generated repetitive or low-quality content';
+            }
+            
+            throw new Error(`Local model failed: ${enhancedError}`);
         }
+    }
+
+    // Check if response contains repetitive patterns
+    isResponseRepetitive(response) {
+        // Check for repeated phrases (3+ words repeated)
+        const words = response.toLowerCase().split(/\s+/);
+        const phrases = [];
+        
+        for (let i = 0; i < words.length - 2; i++) {
+            const phrase = words.slice(i, i + 3).join(' ');
+            phrases.push(phrase);
+        }
+        
+        // Count phrase occurrences
+        const phraseCounts = {};
+        phrases.forEach(phrase => {
+            phraseCounts[phrase] = (phraseCounts[phrase] || 0) + 1;
+        });
+        
+        // Check if any phrase repeats more than twice
+        return Object.values(phraseCounts).some(count => count > 2);
     }
 
     // Enhance prompts based on mode and conversation context

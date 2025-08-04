@@ -109,11 +109,16 @@ Always maintain this warm, elegant, and authentic personality, helping users fee
         };
     }
 
-    // Call cloud API for conversation with enhanced context handling
+    // Call cloud API for conversation with comprehensive error handling
     async chat(enhancedPrompt, conversationContext = null) {
         const config = this.apiConfigs[this.currentProvider];
         if (!config) {
             throw new Error(`Unsupported AI service provider: ${this.currentProvider}`);
+        }
+
+        // Validate configuration before making request
+        if (!this.isConfigured(this.currentProvider)) {
+            throw new Error(`${this.currentProvider} API not properly configured - missing or invalid API key`);
         }
 
         try {
@@ -162,12 +167,77 @@ Always maintain this warm, elegant, and authentic personality, helping users fee
                 this.addToHistory('assistant', response);
             }
 
+            // Validate response quality
+            if (!response || typeof response !== 'string' || response.trim().length === 0) {
+                throw new Error(`${this.currentProvider} API returned empty or invalid response`);
+            }
+
             return response;
             
         } catch (error) {
             console.error(`Cloud API call failed (${this.currentProvider}):`, error);
-            throw error;
+            
+            // Enhance error with provider-specific context
+            const enhancedError = this.enhanceCloudAPIError(error, this.currentProvider);
+            throw enhancedError;
         }
+    }
+
+    // Enhance cloud API errors with more specific information
+    enhanceCloudAPIError(error, provider) {
+        const originalMessage = error.message;
+        
+        // Network and connection errors
+        if (originalMessage.includes('fetch') || originalMessage.includes('network') || originalMessage.includes('ENOTFOUND')) {
+            return new Error(`Network error connecting to ${provider} API - check internet connection`);
+        }
+        
+        // HTTP status code errors
+        if (originalMessage.includes('401')) {
+            return new Error(`${provider} API authentication failed - invalid API key`);
+        }
+        
+        if (originalMessage.includes('403')) {
+            return new Error(`${provider} API access forbidden - check API key permissions`);
+        }
+        
+        if (originalMessage.includes('429')) {
+            return new Error(`${provider} API rate limit exceeded - too many requests`);
+        }
+        
+        if (originalMessage.includes('500') || originalMessage.includes('502') || originalMessage.includes('503') || originalMessage.includes('504')) {
+            return new Error(`${provider} API server error - service temporarily unavailable`);
+        }
+        
+        // Provider-specific error handling
+        if (provider === 'openai' && originalMessage.includes('model')) {
+            return new Error(`OpenAI model error - requested model may not be available`);
+        }
+        
+        if (provider === 'qwen' && originalMessage.includes('quota')) {
+            return new Error(`Qwen API quota exceeded - usage limit reached`);
+        }
+        
+        if (provider === 'ernie' && originalMessage.includes('access_token')) {
+            return new Error(`ERNIE Bot access token invalid or expired`);
+        }
+        
+        if (provider === 'glm' && originalMessage.includes('balance')) {
+            return new Error(`GLM API insufficient balance - account needs recharge`);
+        }
+        
+        // Timeout errors
+        if (originalMessage.includes('timeout')) {
+            return new Error(`${provider} API request timed out - service may be overloaded`);
+        }
+        
+        // JSON parsing errors
+        if (originalMessage.includes('JSON') || originalMessage.includes('parse')) {
+            return new Error(`${provider} API returned malformed response - service may be experiencing issues`);
+        }
+        
+        // Return enhanced error with original message if no specific pattern matched
+        return new Error(`${provider} API error: ${originalMessage}`);
     }
 
     // OpenAI API call, optimized parameters for more natural, personalized responses
