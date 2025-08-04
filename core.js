@@ -169,66 +169,299 @@ class BellaAI {
         }
     }
 
-    // Enhanced thinking execution with robust fallback mechanisms
+    // Enhanced thinking execution with comprehensive fallback mechanisms
     async executeThinkingWithFallback(prompt) {
-        let primaryError = null;
-        let fallbackError = null;
+        const fallbackChain = this.buildFallbackChain();
+        let lastError = null;
+        let attemptCount = 0;
         
-        try {
-            // Primary provider attempt
-            if (this.useCloudAPI && this.cloudAPI.isConfigured()) {
-                console.log('Attempting cloud API processing...');
-                return await this.thinkWithCloudAPI(prompt);
-            } else {
-                console.log('Attempting local model processing...');
-                return await this.thinkWithLocalModel(prompt);
-            }
-        } catch (error) {
-            primaryError = error;
-            console.warn(`Primary provider failed: ${error.message}`);
-            
-            // Fallback attempt
+        for (const provider of fallbackChain) {
+            attemptCount++;
             try {
-                if (this.useCloudAPI) {
-                    console.log('Cloud API failed, falling back to local model...');
-                    return await this.thinkWithLocalModel(prompt);
-                } else {
-                    console.log('Local model failed, falling back to cloud API...');
-                    if (this.cloudAPI.isConfigured()) {
-                        return await this.thinkWithCloudAPI(prompt);
-                    } else {
-                        throw new Error('Cloud API not configured for fallback');
+                console.log(`Attempt ${attemptCount}: Trying ${provider.name} provider...`);
+                
+                const response = await this.executeWithProvider(provider, prompt);
+                
+                // Log successful fallback if not the first attempt
+                if (attemptCount > 1) {
+                    console.log(`Successfully recovered using ${provider.name} after ${attemptCount - 1} failed attempts`);
+                }
+                
+                return response;
+                
+            } catch (error) {
+                lastError = error;
+                console.warn(`${provider.name} provider failed (attempt ${attemptCount}): ${error.message}`);
+                
+                // If this is a critical error that shouldn't trigger fallback, break early
+                if (this.isCriticalError(error)) {
+                    console.error('Critical error detected, stopping fallback chain');
+                    break;
+                }
+                
+                // Add delay between attempts to avoid overwhelming services
+                if (attemptCount < fallbackChain.length) {
+                    await this.delay(Math.min(1000 * attemptCount, 3000)); // Progressive delay up to 3 seconds
+                }
+            }
+        }
+        
+        // All providers failed, create comprehensive error
+        const errorMessage = this.createComprehensiveErrorMessage(fallbackChain, lastError);
+        throw new Error(errorMessage);
+    }
+
+    // Build intelligent fallback chain based on current configuration and availability
+    buildFallbackChain() {
+        const chain = [];
+        
+        // Primary provider (user's preference)
+        if (this.useCloudAPI && this.cloudAPI.isConfigured()) {
+            chain.push({ name: 'cloud-primary', type: 'cloud', provider: this.cloudAPI.getCurrentProvider().name });
+        } else if (this.llm) {
+            chain.push({ name: 'local-primary', type: 'local' });
+        }
+        
+        // Secondary fallback (opposite of primary)
+        if (this.useCloudAPI) {
+            if (this.llm) {
+                chain.push({ name: 'local-fallback', type: 'local' });
+            }
+        } else {
+            if (this.cloudAPI.isConfigured()) {
+                chain.push({ name: 'cloud-fallback', type: 'cloud', provider: this.cloudAPI.getCurrentProvider().name });
+            }
+        }
+        
+        // Tertiary fallback (try other cloud providers if available)
+        if (this.useCloudAPI) {
+            const availableProviders = this.getAvailableCloudProviders();
+            const currentProvider = this.cloudAPI.getCurrentProvider().name;
+            
+            for (const provider of availableProviders) {
+                if (provider !== currentProvider) {
+                    chain.push({ name: `cloud-${provider}`, type: 'cloud', provider });
+                }
+            }
+        }
+        
+        // Emergency fallback (backup response system)
+        chain.push({ name: 'emergency-backup', type: 'backup' });
+        
+        return chain;
+    }
+
+    // Execute thinking with specific provider
+    async executeWithProvider(providerConfig, prompt) {
+        switch (providerConfig.type) {
+            case 'cloud':
+                // Temporarily switch to the specified cloud provider if needed
+                const originalProvider = this.cloudAPI.getCurrentProvider().name;
+                if (providerConfig.provider && providerConfig.provider !== originalProvider) {
+                    this.cloudAPI.switchProvider(providerConfig.provider);
+                }
+                
+                try {
+                    const response = await this.thinkWithCloudAPI(prompt);
+                    return response;
+                } finally {
+                    // Restore original provider
+                    if (providerConfig.provider && providerConfig.provider !== originalProvider) {
+                        this.cloudAPI.switchProvider(originalProvider);
                     }
                 }
-            } catch (error) {
-                fallbackError = error;
-                console.error(`Fallback provider also failed: ${error.message}`);
                 
-                // Both providers failed, throw combined error
-                throw new Error(`Both providers failed. Primary: ${primaryError.message}, Fallback: ${fallbackError.message}`);
-            }
+            case 'local':
+                return await this.thinkWithLocalModel(prompt);
+                
+            case 'backup':
+                return this.getEmergencyBackupResponse(prompt);
+                
+            default:
+                throw new Error(`Unknown provider type: ${providerConfig.type}`);
         }
     }
 
-    // Think using cloud API with enhanced error handling
+    // Check if error is critical and shouldn't trigger fallback
+    isCriticalError(error) {
+        const criticalPatterns = [
+            'invalid prompt',
+            'prompt too long',
+            'malformed input',
+            'security violation'
+        ];
+        
+        const message = error.message.toLowerCase();
+        return criticalPatterns.some(pattern => message.includes(pattern));
+    }
+
+    // Get available cloud providers that are configured
+    getAvailableCloudProviders() {
+        const providers = ['openai', 'qwen', 'ernie', 'glm'];
+        return providers.filter(provider => this.cloudAPI.isConfigured(provider));
+    }
+
+    // Create comprehensive error message for complete failure
+    createComprehensiveErrorMessage(fallbackChain, lastError) {
+        const attemptedProviders = fallbackChain.map(p => p.name).join(', ');
+        return `All thinking providers failed after ${fallbackChain.length} attempts. Tried: ${attemptedProviders}. Last error: ${lastError?.message || 'Unknown error'}`;
+    }
+
+    // Emergency backup response system for complete thinking engine failures
+    getEmergencyBackupResponse(originalPrompt) {
+        console.log('Using emergency backup response system');
+        
+        // Analyze prompt for context clues to provide relevant backup response
+        const prompt = originalPrompt.toLowerCase();
+        
+        // Greeting responses
+        if (this.isGreeting(prompt)) {
+            return this.getBackupGreetingResponse();
+        }
+        
+        // Question responses
+        if (this.isQuestion(prompt)) {
+            return this.getBackupQuestionResponse();
+        }
+        
+        // Help requests
+        if (this.isHelpRequest(prompt)) {
+            return this.getBackupHelpResponse();
+        }
+        
+        // Emotional support
+        if (this.isEmotionalContent(prompt)) {
+            return this.getBackupEmotionalResponse();
+        }
+        
+        // Default backup response
+        return this.getDefaultBackupResponse();
+    }
+
+    // Helper methods for prompt analysis
+    isGreeting(prompt) {
+        const greetingPatterns = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', '你好', 'こんにちは'];
+        return greetingPatterns.some(pattern => prompt.includes(pattern));
+    }
+
+    isQuestion(prompt) {
+        const questionPatterns = ['what', 'how', 'why', 'when', 'where', 'who', 'which', '?'];
+        return questionPatterns.some(pattern => prompt.includes(pattern));
+    }
+
+    isHelpRequest(prompt) {
+        const helpPatterns = ['help', 'assist', 'support', 'guide', 'explain', 'show me'];
+        return helpPatterns.some(pattern => prompt.includes(pattern));
+    }
+
+    isEmotionalContent(prompt) {
+        const emotionalPatterns = ['sad', 'happy', 'angry', 'frustrated', 'excited', 'worried', 'anxious', 'feel'];
+        return emotionalPatterns.some(pattern => prompt.includes(pattern));
+    }
+
+    // Backup response generators
+    getBackupGreetingResponse() {
+        const responses = [
+            "Hello! I'm here and ready to chat, though I'm running on backup systems right now.",
+            "Hi there! My main thinking systems are having issues, but I'm still here to help as best I can.",
+            "Hey! I'm experiencing some technical difficulties, but I'm glad you're here to chat.",
+            "Hello! I'm operating in backup mode right now, but I'm still happy to talk with you."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    getBackupQuestionResponse() {
+        const responses = [
+            "That's a great question! I'm having some technical issues right now, but I'd love to discuss it once my systems are back online.",
+            "I wish I could give you a proper answer right now, but my thinking capabilities are temporarily limited. Could you try asking again in a moment?",
+            "That sounds like something I'd normally love to explore with you! My AI systems are having trouble, but I'll be back to full capacity soon.",
+            "I'm interested in your question, but I'm running on backup systems that can't process complex queries right now. Please try again shortly!"
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    getBackupHelpResponse() {
+        const responses = [
+            "I'd love to help you with that! Unfortunately, my main assistance systems are temporarily unavailable. Please try again in a few moments.",
+            "I'm here to help, but I'm currently running on limited backup systems. Once my full capabilities are restored, I'll be much more useful!",
+            "I want to provide you with the best help possible, but my systems are having issues right now. Please be patient while I get back to full functionality.",
+            "I'm in backup mode right now, so my ability to help is quite limited. Please try your request again once my systems are fully operational."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    getBackupEmotionalResponse() {
+        const responses = [
+            "I can sense there's something important you want to share. While my systems are having issues, I want you to know I'm here for you.",
+            "I wish I could provide better emotional support right now, but my empathy systems are temporarily limited. Please know that I care about how you're feeling.",
+            "Even though I'm running on backup systems, I want you to know that your feelings matter. I'll be back to full capacity to support you soon.",
+            "I may not be able to respond as thoughtfully as usual due to technical issues, but I want you to know I'm listening and I care."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    getDefaultBackupResponse() {
+        const responses = [
+            "I'm currently experiencing technical difficulties with my main thinking systems. I'm working to resolve this and will be back to normal soon!",
+            "My AI capabilities are temporarily limited due to system issues. Please bear with me while I get everything back online.",
+            "I'm running on backup systems right now, which limits my ability to have our usual engaging conversations. I'll be back to full capacity shortly!",
+            "Technical difficulties are affecting my main processing systems. I apologize for the inconvenience and am working to restore full functionality."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Utility method for adding delays between fallback attempts
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Think using cloud API with comprehensive error handling
     async thinkWithCloudAPI(prompt) {
         try {
             if (!this.cloudAPI.isConfigured()) {
-                throw new Error('Cloud API not properly configured');
+                throw new Error('Cloud API not properly configured - missing API key or invalid configuration');
             }
             
             const enhancedPrompt = this.enhancePromptForMode(prompt);
-            const response = await this.cloudAPI.chat(enhancedPrompt);
+            
+            // Add timeout wrapper for cloud API calls
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Cloud API timeout - request took too long')), 10000); // 10 second timeout
+            });
+            
+            const apiPromise = this.cloudAPI.chat(enhancedPrompt);
+            const response = await Promise.race([apiPromise, timeoutPromise]);
             
             if (!response || typeof response !== 'string') {
-                throw new Error('Cloud API returned invalid response');
+                throw new Error('Cloud API returned invalid or empty response');
+            }
+            
+            // Validate response quality
+            if (response.trim().length < 2) {
+                throw new Error('Cloud API response too short after processing');
             }
             
             return response;
             
         } catch (error) {
             console.error('Cloud API processing error:', error);
-            throw new Error(`Cloud API failed: ${error.message}`);
+            
+            // Enhance error message with more specific information
+            let enhancedError = error.message;
+            
+            if (error.message.includes('401') || error.message.includes('403')) {
+                enhancedError = 'Cloud API authentication failed - please check your API key';
+            } else if (error.message.includes('429')) {
+                enhancedError = 'Cloud API rate limit exceeded - too many requests';
+            } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
+                enhancedError = 'Cloud API server error - service temporarily unavailable';
+            } else if (error.message.includes('timeout')) {
+                enhancedError = 'Cloud API request timed out - service may be overloaded';
+            } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                enhancedError = 'Network error - unable to reach cloud API service';
+            }
+            
+            throw new Error(`Cloud API failed: ${enhancedError}`);
         }
     }
 
@@ -369,21 +602,61 @@ class BellaAI {
         return cleaned;
     }
 
-    // Enhanced error handling with contextual responses
+    // Enhanced error handling with comprehensive fallback system
     handleThinkingError(error, originalPrompt) {
         console.error('Handling thinking error:', error);
         
         // Categorize error types for appropriate responses
-        if (error.message.includes('timeout')) {
-            return this.getTimeoutResponse();
-        } else if (error.message.includes('Invalid prompt')) {
-            return this.getInvalidInputResponse();
-        } else if (error.message.includes('Both providers failed')) {
-            return this.getSystemFailureResponse();
-        } else if (error.message.includes('Response too short')) {
-            return this.getEmptyResponseFallback(originalPrompt);
+        const errorType = this.categorizeError(error);
+        
+        switch (errorType) {
+            case 'timeout':
+                return this.getTimeoutResponse();
+            case 'invalid_input':
+                return this.getInvalidInputResponse();
+            case 'system_failure':
+                return this.getSystemFailureResponse();
+            case 'empty_response':
+                return this.getEmptyResponseFallback(originalPrompt);
+            case 'network_error':
+                return this.getNetworkErrorResponse();
+            case 'authentication_error':
+                return this.getAuthenticationErrorResponse();
+            case 'rate_limit_error':
+                return this.getRateLimitErrorResponse();
+            case 'model_error':
+                return this.getModelErrorResponse();
+            case 'configuration_error':
+                return this.getConfigurationErrorResponse();
+            default:
+                return this.getGenericErrorResponse();
+        }
+    }
+
+    // Categorize errors for more precise handling
+    categorizeError(error) {
+        const message = error.message.toLowerCase();
+        
+        if (message.includes('timeout') || message.includes('processing timeout')) {
+            return 'timeout';
+        } else if (message.includes('invalid prompt') || message.includes('invalid input')) {
+            return 'invalid_input';
+        } else if (message.includes('both providers failed') || message.includes('system failure')) {
+            return 'system_failure';
+        } else if (message.includes('response too short') || message.includes('empty response')) {
+            return 'empty_response';
+        } else if (message.includes('network') || message.includes('fetch') || message.includes('connection')) {
+            return 'network_error';
+        } else if (message.includes('401') || message.includes('403') || message.includes('unauthorized') || message.includes('authentication')) {
+            return 'authentication_error';
+        } else if (message.includes('429') || message.includes('rate limit') || message.includes('quota')) {
+            return 'rate_limit_error';
+        } else if (message.includes('model not initialized') || message.includes('model failed') || message.includes('model error')) {
+            return 'model_error';
+        } else if (message.includes('not configured') || message.includes('configuration')) {
+            return 'configuration_error';
         } else {
-            return this.getGenericErrorResponse();
+            return 'generic';
         }
     }
 
@@ -434,6 +707,61 @@ class BellaAI {
         } else {
             return this.getGenericErrorResponse();
         }
+    }
+
+    // Get network error response
+    getNetworkErrorResponse() {
+        const networkErrorResponses = [
+            "I'm having trouble connecting to my thinking services right now. Let me try a different approach.",
+            "My connection seems unstable at the moment. Please give me a moment to reconnect.",
+            "I'm experiencing network issues. Let me try to process that locally instead.",
+            "There seems to be a connectivity problem. I'll attempt to use my offline capabilities."
+        ];
+        return networkErrorResponses[Math.floor(Math.random() * networkErrorResponses.length)];
+    }
+
+    // Get authentication error response
+    getAuthenticationErrorResponse() {
+        const authErrorResponses = [
+            "I'm having trouble accessing my cloud services. Let me try using my local capabilities instead.",
+            "There's an authentication issue with my external services. I'll switch to offline mode for now.",
+            "My cloud access seems to be having issues. Let me process that using my built-in knowledge.",
+            "I can't connect to my external AI services right now, but I can still help using my local processing."
+        ];
+        return authErrorResponses[Math.floor(Math.random() * authErrorResponses.length)];
+    }
+
+    // Get rate limit error response
+    getRateLimitErrorResponse() {
+        const rateLimitResponses = [
+            "I'm being asked to slow down by my cloud services. Let me try using my local processing instead.",
+            "My external services are busy right now. I'll switch to my offline capabilities to help you.",
+            "I've reached my usage limit with cloud services. Let me handle this with my built-in intelligence.",
+            "The cloud services are at capacity. I'll use my local processing to continue our conversation."
+        ];
+        return rateLimitResponses[Math.floor(Math.random() * rateLimitResponses.length)];
+    }
+
+    // Get model error response
+    getModelErrorResponse() {
+        const modelErrorResponses = [
+            "My thinking model is having some difficulties. Let me try to restart and get back to you.",
+            "There's an issue with my AI processing. I'm working to resolve it and will be back shortly.",
+            "My language model seems to be having trouble. Let me try a different approach to help you.",
+            "I'm experiencing some technical issues with my AI brain. Please bear with me while I sort this out."
+        ];
+        return modelErrorResponses[Math.floor(Math.random() * modelErrorResponses.length)];
+    }
+
+    // Get configuration error response
+    getConfigurationErrorResponse() {
+        const configErrorResponses = [
+            "My settings seem to need adjustment. Let me try to reconfigure and help you properly.",
+            "There's a configuration issue I need to resolve. I'll work on fixing this right away.",
+            "My system setup needs some attention. Let me try to sort this out and get back to helping you.",
+            "I need to check my configuration settings. Please give me a moment to get everything working properly."
+        ];
+        return configErrorResponses[Math.floor(Math.random() * configErrorResponses.length)];
     }
 
     // Get generic error response
