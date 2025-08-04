@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella AI - Error Handling Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .status {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bella AI - Error Handling & Fallback System Test</h1>
+        <p>This page tests the comprehensive error handling and fallback mechanisms implemented in Bella's thinking engine.</p>
+        
+        <div class="status" id="status">Status: Initializing...</div>
+        
+        <div class="test-section">
+            <h3>1. Normal Operation Test</h3>
+            <p>Test normal thinking operation with valid input.</p>
+            <button onclick="testNormalOperation()">Test Normal Thinking</button>
+            <div id="normal-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Provider Fallback Test</h3>
+            <p>Test fallback from primary provider to secondary provider.</p>
+            <button onclick="testProviderFallback()">Test Provider Fallback</button>
+            <div id="fallback-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Invalid Input Test</h3>
+            <p>Test error handling for invalid or malformed input.</p>
+            <button onclick="testInvalidInput()">Test Invalid Input</button>
+            <div id="invalid-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Timeout Simulation Test</h3>
+            <p>Test timeout handling and appropriate error responses.</p>
+            <button onclick="testTimeoutHandling()">Test Timeout Handling</button>
+            <div id="timeout-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. Emergency Backup System Test</h3>
+            <p>Test the emergency backup response system when all providers fail.</p>
+            <button onclick="testEmergencyBackup()">Test Emergency Backup</button>
+            <div id="emergency-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>6. Error Categorization Test</h3>
+            <p>Test different error types and their specific responses.</p>
+            <button onclick="testErrorCategorization()">Test Error Categories</button>
+            <div id="categorization-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>7. Configuration Status Test</h3>
+            <p>Test provider configuration detection and status reporting.</p>
+            <button onclick="testConfigurationStatus()">Test Configuration Status</button>
+            <div id="config-result" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { BellaAI } from './core.js';
+        
+        let bella = null;
+        
+        // Initialize Bella AI
+        async function initializeBella() {
+            try {
+                document.getElementById('status').textContent = 'Status: Loading Bella AI...';
+                bella = await BellaAI.getInstance();
+                document.getElementById('status').textContent = 'Status: Bella AI Ready';
+                document.getElementById('status').style.color = 'green';
+            } catch (error) {
+                document.getElementById('status').textContent = `Status: Failed to initialize - ${error.message}`;
+                document.getElementById('status').style.color = 'red';
+            }
+        }
+        
+        // Test normal operation
+        window.testNormalOperation = async function() {
+            const resultDiv = document.getElementById('normal-result');
+            resultDiv.textContent = 'Testing normal operation...';
+            resultDiv.className = 'result info';
+            
+            try {
+                const response = await bella.think('Hello, how are you today?');
+                resultDiv.textContent = `Success: ${response}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        };
+        
+        // Test provider fallback
+        window.testProviderFallback = async function() {
+            const resultDiv = document.getElementById('fallback-result');
+            resultDiv.textContent = 'Testing provider fallback...';
+            resultDiv.className = 'result info';
+            
+            try {
+                // Force a provider switch to test fallback
+                const originalProvider = bella.useCloudAPI;
+                bella.useCloudAPI = !bella.useCloudAPI; // Switch to opposite provider
+                
+                const response = await bella.think('Test fallback mechanism');
+                
+                // Restore original provider
+                bella.useCloudAPI = originalProvider;
+                
+                resultDiv.textContent = `Fallback Success: ${response}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Fallback Test Result: ${error.message}`;
+                resultDiv.className = 'result info';
+            }
+        };
+        
+        // Test invalid input
+        window.testInvalidInput = async function() {
+            const resultDiv = document.getElementById('invalid-result');
+            resultDiv.textContent = 'Testing invalid input handling...';
+            resultDiv.className = 'result info';
+            
+            try {
+                // Test with empty input
+                const response1 = await bella.think('');
+                resultDiv.textContent = `Empty Input Response: ${response1}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                try {
+                    // Test with null input
+                    const response2 = await bella.think(null);
+                    resultDiv.textContent = `Null Input Response: ${response2}`;
+                    resultDiv.className = 'result success';
+                } catch (error2) {
+                    resultDiv.textContent = `Invalid Input Handling: ${error2.message}`;
+                    resultDiv.className = 'result success';
+                }
+            }
+        };
+        
+        // Test timeout handling
+        window.testTimeoutHandling = async function() {
+            const resultDiv = document.getElementById('timeout-result');
+            resultDiv.textContent = 'Testing timeout handling...';
+            resultDiv.className = 'result info';
+            
+            try {
+                // Test with very short timeout
+                const response = await bella.think('Tell me a very long story about artificial intelligence', { maxProcessingTime: 100 });
+                resultDiv.textContent = `Timeout Test Response: ${response}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Timeout Handling: ${error.message}`;
+                resultDiv.className = 'result success';
+            }
+        };
+        
+        // Test emergency backup system
+        window.testEmergencyBackup = async function() {
+            const resultDiv = document.getElementById('emergency-result');
+            resultDiv.textContent = 'Testing emergency backup system...';
+            resultDiv.className = 'result info';
+            
+            try {
+                // Temporarily disable both providers to trigger emergency backup
+                const originalLLM = bella.llm;
+                const originalCloudAPI = bella.cloudAPI;
+                
+                bella.llm = null; // Disable local model
+                bella.cloudAPI = { isConfigured: () => false }; // Disable cloud API
+                
+                const response = await bella.think('Hello, this should trigger emergency backup');
+                
+                // Restore original providers
+                bella.llm = originalLLM;
+                bella.cloudAPI = originalCloudAPI;
+                
+                resultDiv.textContent = `Emergency Backup Response: ${response}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Emergency Backup Test: ${error.message}`;
+                resultDiv.className = 'result info';
+            }
+        };
+        
+        // Test error categorization
+        window.testErrorCategorization = async function() {
+            const resultDiv = document.getElementById('categorization-result');
+            resultDiv.textContent = 'Testing error categorization...';
+            resultDiv.className = 'result info';
+            
+            const errorTypes = [
+                'timeout',
+                'invalid_input', 
+                'network_error',
+                'authentication_error',
+                'rate_limit_error',
+                'model_error',
+                'configuration_error'
+            ];
+            
+            let results = 'Error Categorization Results:\n\n';
+            
+            for (const errorType of errorTypes) {
+                try {
+                    const mockError = new Error(`Test ${errorType} error message`);
+                    const category = bella.categorizeError(mockError);
+                    results += `${errorType}: ${category === errorType ? '✓' : '✗'} (detected as: ${category})\n`;
+                } catch (error) {
+                    results += `${errorType}: Error testing - ${error.message}\n`;
+                }
+            }
+            
+            resultDiv.textContent = results;
+            resultDiv.className = 'result success';
+        };
+        
+        // Test configuration status
+        window.testConfigurationStatus = async function() {
+            const resultDiv = document.getElementById('config-result');
+            resultDiv.textContent = 'Testing configuration status...';
+            resultDiv.className = 'result info';
+            
+            try {
+                const config = bella.getCurrentConfig();
+                const cloudProviders = bella.getAvailableCloudProviders();
+                
+                let status = 'Configuration Status:\n\n';
+                status += `Current Provider: ${config.provider.name}\n`;
+                status += `Using Cloud API: ${config.useCloudAPI}\n`;
+                status += `Is Configured: ${config.isConfigured}\n`;
+                status += `Current Mode: ${config.mode}\n`;
+                status += `Available Cloud Providers: ${cloudProviders.join(', ') || 'None'}\n`;
+                status += `Local Model Available: ${bella.llm ? 'Yes' : 'No'}\n`;
+                
+                resultDiv.textContent = status;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `Configuration Test Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        };
+        
+        // Initialize on page load
+        initializeBella();
+    </script>
+</body>
+</html>
