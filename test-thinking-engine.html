@@ -86,6 +86,20 @@
     </div>
 
     <div class="test-container">
+        <h3>Conversation Context Test</h3>
+        <button class="test-button" onclick="testConversationContext()">Test Context Management</button>
+        <div id="contextResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h3>Session Management</h3>
+        <button class="test-button" onclick="showSessionStats()">Show Session Stats</button>
+        <button class="test-button" onclick="clearConversation()">Clear History</button>
+        <button class="test-button" onclick="startNewSession()">New Session</button>
+        <div id="sessionResult" class="test-result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
         <h3>Error Handling Tests</h3>
         <button class="test-button" onclick="testErrorHandling()">Test Error Handling</button>
         <div id="errorResult" class="test-result" style="display: none;"></div>
@@ -239,6 +253,117 @@ ${metrics.metrics.slice(-5).map(m =>
 
             result.textContent = results;
             result.className = 'test-result info';
+            result.style.display = 'block';
+        };
+
+        // Test conversation context
+        window.testConversationContext = async function() {
+            const result = document.getElementById('contextResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                // Test conversation flow
+                const messages = [
+                    "Hi, my name is John",
+                    "What's my name?",
+                    "I like pizza",
+                    "What food do I like?"
+                ];
+
+                let results = 'Conversation Context Test:\n\n';
+                
+                for (let i = 0; i < messages.length; i++) {
+                    const response = await bellaAI.think(messages[i]);
+                    results += `${i + 1}. User: ${messages[i]}\n   Bella: ${response}\n\n`;
+                    
+                    // Add delay between messages
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+
+                // Show context information
+                const context = bellaAI.getConversationContext();
+                results += `Context Summary: ${context.contextSummary}\n`;
+                results += `Keywords: ${context.contextKeywords.join(', ')}\n`;
+                results += `Session ID: ${context.sessionId}\n`;
+
+                result.textContent = results;
+                result.className = 'test-result success';
+                result.style.display = 'block';
+
+            } catch (error) {
+                result.textContent = `Context test error: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Show session statistics
+        window.showSessionStats = function() {
+            const result = document.getElementById('sessionResult');
+            
+            if (!initializationComplete || !bellaAI) {
+                result.textContent = 'Bella AI is not initialized yet.';
+                result.className = 'test-result error';
+                result.style.display = 'block';
+                return;
+            }
+
+            try {
+                const stats = bellaAI.getSessionStats();
+                const history = bellaAI.getConversationHistory(5);
+                
+                result.innerHTML = `
+<strong>Session Statistics:</strong>
+Session ID: ${stats.sessionId}
+Duration: ${Math.round(stats.duration / 1000)}s
+Message Count: ${stats.messageCount}
+Average Response Time: ${stats.averageResponseTime}ms
+Context Keywords: ${stats.contextKeywords}
+User Preferences: ${stats.userPreferences}
+Current Mode: ${stats.currentMode}
+Is Active: ${stats.isActive}
+
+<strong>Recent History (${history.length} messages):</strong>
+${history.map(msg => `${msg.role}: ${msg.content.substring(0, 50)}...`).join('\n')}
+                `;
+                result.className = 'test-result info';
+                result.style.display = 'block';
+            } catch (error) {
+                result.textContent = `Error getting session stats: ${error.message}`;
+                result.className = 'test-result error';
+                result.style.display = 'block';
+            }
+        };
+
+        // Clear conversation history
+        window.clearConversation = function() {
+            if (!initializationComplete || !bellaAI) {
+                return;
+            }
+
+            bellaAI.clearHistory();
+            const result = document.getElementById('sessionResult');
+            result.textContent = 'Conversation history cleared successfully!';
+            result.className = 'test-result success';
+            result.style.display = 'block';
+        };
+
+        // Start new session
+        window.startNewSession = function() {
+            if (!initializationComplete || !bellaAI) {
+                return;
+            }
+
+            const newSessionId = bellaAI.startNewSession();
+            const result = document.getElementById('sessionResult');
+            result.textContent = `New session started: ${newSessionId}`;
+            result.className = 'test-result success';
             result.style.display = 'block';
         };
 

@@ -122,6 +122,9 @@ class ChatInterface {
                         <option value="assistant">智能助手</option>
                         <option value="creative">创意伙伴</option>
                     </select>
+                    <div class="bella-mode-description">
+                        <small id="modeDescription">选择不同的聊天模式来改变贝拉的回应风格</small>
+                    </div>
                 </div>
                 <div class="bella-setting-group">
                     <button class="bella-clear-history">清除聊天记录</button>

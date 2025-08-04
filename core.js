@@ -579,7 +579,18 @@ class BellaAI {
 
     // Check if conversation context is still valid
     isContextValid() {
-        return this.conversationContext.isContextValid()
+        return this.conversationContext.isContextValid();
+    }
+
+    // Export conversation for backup
+    exportConversation() {
+        return this.conversationContext.exportConversation();
+    }
+
+    // Import conversation from backup
+    importConversation(data) {
+        return this.conversationContext.importConversation(data);
+    }
 }
 
 // ES6 module export
