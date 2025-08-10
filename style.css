@@ -1,4 +1,4 @@
-/* --- 加载屏幕 --- */
+/* --- Loading Screen --- */
 #loading-screen {
     position: fixed;
     top: 0;
@@ -14,7 +14,7 @@
 }
 
 #loading-screen img {
-    width: 150px; /* 或者您希望的任何尺寸 */
+    width: 150px; /* Or any size you prefer */
     height: auto;
     animation: pulse-loader 2s infinite;
 }
@@ -35,7 +35,7 @@
 }
 
 
-/* --- 基本重置和全局样式 --- */
+/* --- Basic Reset and Global Styles --- */
 * {
     margin: 0;
     padding: 0;
@@ -46,10 +46,10 @@ html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: white;
-    overflow: hidden; /* 防止视频导致滚动条 */
+    overflow: hidden; /* Prevent scrollbars caused by video */
 }
 
-/* --- 视频背景 --- */
+/* --- Video Background --- */
 .video-container {
     position: fixed;
     top: 0;
@@ -66,29 +66,29 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* 保持视频比例，留出黑边 */
+    object-fit: contain; /* Maintain video aspect ratio, leave black borders */
     opacity: 0;
-    transition: opacity 0.2s ease-in-out; /* 交叉淡入淡出动画 */
+    transition: opacity 0.2s ease-in-out; /* Crossfade animation */
 }
 
 .bg-video.active {
     opacity: 1;
 }
 
-/* --- 内容覆盖层 --- */
+/* --- Content Overlay --- */
 .content-overlay {
     position: relative;
     height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* 顶部和底部分别对齐 */
+    justify-content: space-between; /* Align top and bottom separately */
     align-items: center;
     padding: 25px;
     z-index: 1;
 }
 
-/* --- 顶部好感度条 --- */
+/* --- Top Favorability Bar --- */
 .top-bar {
     width: 100%;
     max-width: 500px;
@@ -113,21 +113,21 @@ html, body {
 
 .progress-fill {
     height: 100%;
-    width: 65%; /* 初始好感度值 */
-    background: linear-gradient(90deg, #ff9a9e, #fecfef); /* 粉色渐变 */
+    width: 65%; /* Initial favorability value */
+    background: linear-gradient(90deg, #ff9a9e, #fecfef); /* Pink gradient */
     border-radius: 10px;
     transition: width 0.5s ease-in-out;
 }
 
-/* --- 中间内容 (上传按钮) --- */
+/* --- Middle Content (Upload Button) --- */
 .center-content {
-    /* 这个区域现在是空的，可以移除或保留以备将来使用 */
+    /* This area is currently empty, can be removed or kept for future use */
 }
 
-/* --- 语音识别结果显示 --- */
+/* --- Speech Recognition Result Display --- */
 .transcript-container {
     position: absolute;
-    bottom: 180px; /* 放置在麦克风按钮上方 */
+    bottom: 180px; /* Placed above the microphone button */
     left: 50%;
     transform: translateX(-50%);
     width: 80%;
@@ -138,7 +138,7 @@ html, body {
     text-align: center;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    pointer-events: none; /* 默认不响应鼠标事件 */
+    pointer-events: none; /* Default does not respond to mouse events */
 }
 
 .transcript-container.visible {
@@ -151,10 +151,10 @@ html, body {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
-/* 情感分析测试区域样式 */
+/* Sentiment Analysis Test Area Styles */
 .sentiment-analysis-container {
     position: fixed;
-    bottom: 120px; /* 位于麦克风按钮上方 */
+    bottom: 120px; /* Located above the microphone button */
     left: 50%;
     transform: translateX(-50%);
     background-color: rgba(0, 0, 0, 0.7);
@@ -209,10 +209,10 @@ html, body {
     text-align: center;
 }
 
-/* 本地语音识别测试区域样式 */
+/* Local Speech Recognition Test Area Styles */
 .local-asr-container {
     position: fixed;
-    bottom: 150px; /* 调整位置，避免与情感分析区域重叠 */
+    bottom: 150px; /* Adjust position to avoid overlap with sentiment analysis area */
     left: 50%;
     transform: translateX(-50%);
     background-color: rgba(0, 0, 0, 0.7);
@@ -225,7 +225,7 @@ html, body {
 }
 
 #local-mic-button {
-    background-color: #4CAF50; /* 绿色 */
+    background-color: #4CAF50; /* Green */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -261,13 +261,13 @@ html, body {
 
 #local-asr-result {
     font-weight: bold;
-    color: #2196F3; /* 蓝色 */
+    color: #2196F3; /* Blue */
 }
 
-/* --- 悬浮按钮和菜单 --- */
+/* --- Floating Button and Menu --- */
 #floating-button {
     position: fixed;
-    bottom: 120px; /* 调整位置，使其在麦克风按钮上方 */
+    bottom: 120px; /* Adjust position, above the microphone button */
     right: 30px;
     width: 60px;
     height: 60px;
@@ -297,7 +297,7 @@ html, body {
 
 #menu-container {
     position: fixed;
-    bottom: 200px; /* 调整位置，使其在悬浮按钮上方 */
+    bottom: 200px; /* Adjust position, above the floating button */
     right: 30px;
     width: 150px;
     background: rgba(0, 0, 0, 0.7);
@@ -336,14 +336,14 @@ html, body {
 }
 
 
-/* --- 底部内容 --- */
+/* --- Bottom Content --- */
 .bottom-bar {
     width: 100%;
     display: flex;
-    flex-direction: column; /* 垂直排列 */
-    justify-content: center; /* 水平居中 */
-    align-items: center; /* 垂直居中 */
-    position: relative; /* 为链接定位 */
+    flex-direction: column; /* Vertical arrangement */
+    justify-content: center; /* Horizontal center */
+    align-items: center; /* Vertical center */
+    position: relative; /* For link positioning */
 }
 
 .mic-button {
@@ -377,7 +377,7 @@ html, body {
     color: white;
 }
 
-/* 麦克风 "监听中" 的动画效果 */
+/* Microphone "Listening" Animation Effect */
 .mic-button.is-listening {
     animation: pulse 1.5s infinite;
 }
@@ -395,7 +395,7 @@ html, body {
 }
 
 .footer-credit {
-    margin-top: 20px; /* 与麦克风按钮的间距 */
+    margin-top: 20px; /* Spacing from microphone button */
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     font-size: 1rem;
@@ -407,7 +407,7 @@ html, body {
     text-decoration: underline;
 }
 
-/* --- 响应式设计 --- */
+/* --- Responsive Design --- */
 @media (max-width: 600px) {
     .content-overlay {
         padding: 20px;
