@@ -1,19 +1,19 @@
-// 导入 Transformers.js 的 pipeline
+// Import the Transformers.js pipeline
 import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- 加载屏幕处理 ---
+    // --- Loading screen handling ---
     const loadingScreen = document.getElementById('loading-screen');
     setTimeout(() => {
         loadingScreen.style.opacity = '0';
-        // 在动画结束后将其隐藏，以防它阻碍交互
+        // Hide it after the animation to prevent it from blocking interactions
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-        }, 500); // 这个时间应该匹配 CSS 中的 transition 时间
-    }, 1500); // 1.5秒后开始淡出
+        }, 500); // This time should match the transition time in CSS
+    }, 1500); // Start fading out after 1.5 seconds
     
-    // 获取需要的 DOM 元素
+    // Get necessary DOM elements
     let video1 = document.getElementById('video1');
     let video2 = document.getElementById('video2');
     const micButton = document.getElementById('mic-button');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuContainer = document.getElementById('menu-container');
     const menuItems = document.querySelectorAll('.menu-item');
 
-    // --- 情感分析元素 ---
+    // --- Sentiment analysis elements ---
     const sentimentInput = document.getElementById('sentiment-input');
     const analyzeButton = document.getElementById('analyze-button');
     const sentimentResult = document.getElementById('sentiment-result');
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeVideo = video1;
     let inactiveVideo = video2;
 
-    // 视频列表
+    // Video list
     const videoList = [
         '视频资源/3D 建模图片制作.mp4',
         '视频资源/jimeng-2025-07-16-1043-笑着优雅的左右摇晃，过一会儿手扶着下巴，保持微笑.mp4',
@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
         '视频资源/负面/jimeng-2025-07-16-9418-双手叉腰，嘴巴一直在嘟囔，表情微微生气.mp4'
     ];
 
-    // --- 视频交叉淡入淡出播放功能 ---
+    // --- Video cross-fade playback function ---
     function switchVideo() {
-        // 1. 选择下一个视频
+        // 1. Select the next video
         const currentVideoSrc = activeVideo.querySelector('source').getAttribute('src');
         let nextVideoSrc = currentVideoSrc;
         while (nextVideoSrc === currentVideoSrc) {
@@ -50,46 +50,46 @@ document.addEventListener('DOMContentLoaded', function() {
             nextVideoSrc = videoList[randomIndex];
         }
 
-        // 2. 设置不活动的 video 元素的 source
+        // 2. Set the source of the inactive video element
         inactiveVideo.querySelector('source').setAttribute('src', nextVideoSrc);
         inactiveVideo.load();
 
-        // 3. 当不活动的视频可以播放时，执行切换
+        // 3. When the inactive video can play, perform the switch
         inactiveVideo.addEventListener('canplaythrough', function onCanPlayThrough() {
-            // 确保事件只触发一次
+            // Ensure the event only fires once
             inactiveVideo.removeEventListener('canplaythrough', onCanPlayThrough);
 
-            // 4. 播放新视频
+            // 4. Play the new video
             inactiveVideo.play().catch(error => {
                 console.error("Video play failed:", error);
             });
 
-            // 5. 切换 active class 来触发 CSS 过渡
+            // 5. Switch the active class to trigger the CSS transition
             activeVideo.classList.remove('active');
             inactiveVideo.classList.add('active');
 
-            // 6. 更新角色
+            // 6. Update roles
             [activeVideo, inactiveVideo] = [inactiveVideo, activeVideo];
 
-            // 为新的 activeVideo 绑定 ended 事件
+            // Bind the 'ended' event to the new activeVideo
             activeVideo.addEventListener('ended', switchVideo, { once: true });
-        }, { once: true }); // 使用 { once: true } 确保事件只被处理一次
+        }, { once: true }); // Use { once: true } to ensure the event is handled only once
     }
 
-    // 初始启动
+    // Initial start
     activeVideo.addEventListener('ended', switchVideo, { once: true });
 
 
-    // --- 语音识别核心 ---
+    // --- Speech Recognition Core ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
-    // 检查浏览器是否支持语音识别
+    // Check if the browser supports speech recognition
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        recognition.continuous = true; // 持续识别
-        recognition.lang = 'zh-CN'; // 设置语言为中文
-        recognition.interimResults = true; // 获取临时结果
+        recognition.continuous = true; // Continuous recognition
+        recognition.lang = 'zh-CN'; // Set language to Chinese
+        recognition.interimResults = true; // Get interim results
 
         recognition.onresult = (event) => {
             const transcriptContainer = document.getElementById('transcript');
@@ -104,29 +104,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // 显示最终识别结果
+            // Display the final recognition result
             transcriptContainer.textContent = final_transcript || interim_transcript;
             
-            // 基于关键词的情感分析和视频切换
+            // Keyword-based sentiment analysis and video switching
             if (final_transcript) {
                 analyzeAndReact(final_transcript);
             }
         };
 
         recognition.onerror = (event) => {
-            console.error('语音识别错误:', event.error);
+            console.error('Speech recognition error:', event.error);
         };
 
     } else {
-        console.log('您的浏览器不支持语音识别功能。');
-        // 可以在界面上给用户提示
+        console.log('Your browser does not support speech recognition.');
+        // You can display a message to the user on the interface
     }
 
-    // --- 麦克风按钮交互 ---
+    // --- Microphone button interaction ---
     let isListening = false;
 
     micButton.addEventListener('click', function() {
-        if (!SpeechRecognition) return; // 如果不支持，则不执行任何操作
+        if (!SpeechRecognition) return; // If not supported, do nothing
 
         isListening = !isListening;
         micButton.classList.toggle('is-listening', isListening);
@@ -134,20 +134,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const transcriptText = document.getElementById('transcript');
 
         if (isListening) {
-            transcriptText.textContent = '聆听中...'; // 立刻显示提示
+            transcriptText.textContent = 'Listening...'; // Show prompt immediately
             transcriptContainer.classList.add('visible');
             recognition.start();
         } else {
             recognition.stop();
             transcriptContainer.classList.remove('visible');
-            transcriptText.textContent = ''; // 清空文本
+            transcriptText.textContent = ''; // Clear text
         }
     });
 
 
-    // --- 悬浮按钮交互 ---
+    // --- Floating button interaction ---
     floatingButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // 防止事件冒泡到 document
+        event.stopPropagation(); // Prevent event from bubbling to the document
         menuContainer.classList.toggle('hidden');
     });
 
@@ -159,14 +159,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 点击菜单外部区域关闭菜单
+    // Close the menu when clicking outside of it
     document.addEventListener('click', () => {
         if (!menuContainer.classList.contains('hidden')) {
             menuContainer.classList.add('hidden');
         }
     });
 
-    // 阻止菜单自身的点击事件冒泡
+    // Prevent the menu's own click events from bubbling up
     menuContainer.addEventListener('click', (event) => {
         event.stopPropagation();
     });
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         inactiveVideo.addEventListener('canplaythrough', function onCanPlayThrough() {
             inactiveVideo.removeEventListener('canplaythrough', onCanPlayThrough);
-            activeVideo.pause(); // 暂停当前视频，防止其 'ended' 事件触发切换
+            activeVideo.pause(); // Pause the current video to prevent its 'ended' event from triggering a switch
             inactiveVideo.play().catch(error => console.error("Video play failed:", error));
             activeVideo.classList.remove('active');
             inactiveVideo.classList.add('active');
@@ -190,9 +190,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { once: true });
     }
 
-    // --- 情感分析与反应 ---
-    const positiveWords = ['开心', '高兴', '喜欢', '太棒了', '你好', '漂亮'];
-    const negativeWords = ['难过', '生气', '讨厌', '伤心'];
+    // --- Sentiment Analysis and Reaction ---
+    const positiveWords = ['开心', '高兴', '喜欢', '太棒了', '你好', '漂亮']; // Chinese: happy, glad, like, awesome, hello, beautiful
+    const negativeWords = ['难过', '生气', '讨厌', '伤心']; // Chinese: sad, angry, hate, heartbroken
 
     const positiveVideos = [
         '视频资源/jimeng-2025-07-16-1043-笑着优雅的左右摇晃，过一会儿手扶着下巴，保持微笑.mp4',
@@ -202,39 +202,39 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
     const negativeVideo = '视频资源/负面/jimeng-2025-07-16-9418-双手叉腰，嘴巴一直在嘟囔，表情微微生气.mp4';
 
-    // --- 本地模型情感分析 ---
+    // --- Local Model Sentiment Analysis ---
     let classifier;
     analyzeButton.addEventListener('click', async () => {
         const text = sentimentInput.value;
         if (!text) return;
 
-        sentimentResult.textContent = '正在分析中...';
+        sentimentResult.textContent = 'Analyzing...';
 
-        // 第一次点击时，初始化分类器
+        // Initialize the classifier on the first click
         if (!classifier) {
             try {
                 classifier = await pipeline('sentiment-analysis');
             } catch (error) {
-                console.error('模型加载失败:', error);
-                sentimentResult.textContent = '抱歉，模型加载失败了。';
+                console.error('Model loading failed:', error);
+                sentimentResult.textContent = 'Sorry, the model failed to load.';
                 return;
             }
         }
 
-        // 进行情感分析
+        // Perform sentiment analysis
         try {
             const result = await classifier(text);
-            // 显示最主要的情绪和分数
+            // Display the primary emotion and score
             const primaryEmotion = result[0];
-            sentimentResult.textContent = `情绪: ${primaryEmotion.label}, 分数: ${primaryEmotion.score.toFixed(2)}`;
+            sentimentResult.textContent = `Emotion: ${primaryEmotion.label}, Score: ${primaryEmotion.score.toFixed(2)}`;
         } catch (error) {
-            console.error('情感分析失败:', error);
-            sentimentResult.textContent = '分析时出错了。';
+            console.error('Sentiment analysis failed:', error);
+            sentimentResult.textContent = 'An error occurred during analysis.';
         }
     });
 
 
-    // --- 本地语音识别 --- //
+    // --- Local Speech Recognition --- //
     const localMicButton = document.getElementById('local-mic-button');
     const localAsrResult = document.getElementById('local-asr-result');
 
@@ -243,29 +243,29 @@ document.addEventListener('DOMContentLoaded', function() {
     let isRecording = false;
 
     const handleRecord = async () => {
-        // 状态切换：如果正在录音，则停止
+        // Toggle state: if recording, stop
         if (isRecording) {
             mediaRecorder.stop();
             isRecording = false;
-            localMicButton.textContent = '开始本地识别';
+            localMicButton.textContent = 'Start Local Recognition';
             localMicButton.classList.remove('recording');
             return;
         }
 
-        // 初始化模型（仅一次）
+        // Initialize model (only once)
         if (!recognizer) {
-            localAsrResult.textContent = '正在加载语音识别模型...';
+            localAsrResult.textContent = 'Loading speech recognition model...';
             try {
                 recognizer = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny');
-                localAsrResult.textContent = '模型加载完毕，请开始说话...';
+                localAsrResult.textContent = 'Model loaded, please start speaking...';
             } catch (error) {
-                console.error('模型加载失败:', error);
-                localAsrResult.textContent = '抱歉，模型加载失败了。';
+                console.error('Model loading failed:', error);
+                localAsrResult.textContent = 'Sorry, the model failed to load.';
                 return;
             }
         }
 
-        // 开始录音
+        // Start recording
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
@@ -280,9 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const arrayBuffer = await audioBlob.arrayBuffer();
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // 检查音频数据是否为空
+                // Check if audio data is empty
                 if (arrayBuffer.byteLength === 0) {
-                    localAsrResult.textContent = '没有录制到音频，请重试。';
+                    localAsrResult.textContent = 'No audio was recorded, please try again.';
                     return;
                 }
 
@@ -290,25 +290,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                     const rawAudio = audioBuffer.getChannelData(0);
     
-                    localAsrResult.textContent = '正在识别...';
+                    localAsrResult.textContent = 'Recognizing...';
                     const output = await recognizer(rawAudio);
-                    localAsrResult.textContent = output.text || '未能识别出任何内容。';
+                    localAsrResult.textContent = output.text || 'Could not recognize any content.';
                 } catch(e) {
-                    console.error('音频解码或识别失败:', e);
-                    localAsrResult.textContent = '处理音频时出错，请再试一次。';
+                    console.error('Audio decoding or recognition failed:', e);
+                    localAsrResult.textContent = 'Error processing audio, please try again.';
                 }
             });
 
             mediaRecorder.start();
             isRecording = true;
-            localMicButton.textContent = '正在录音... 点击停止';
+            localMicButton.textContent = 'Recording... Click to stop';
             localMicButton.classList.add('recording');
 
         } catch (error) {
-            console.error('语音识别失败:', error);
-            localAsrResult.textContent = '无法访问麦克风或识别出错。';
-            isRecording = false; // 重置状态
-            localMicButton.textContent = '开始本地识别';
+            console.error('Speech recognition failed:', error);
+            localAsrResult.textContent = 'Could not access microphone or recognition error.';
+            isRecording = false; // Reset state
+            localMicButton.textContent = 'Start Local Recognition';
             localMicButton.classList.remove('recording');
         }
     };
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function analyzeAndReact(text) {
-        let reaction = 'neutral'; // 默认为中性
+        let reaction = 'neutral'; // Default to neutral
 
         if (positiveWords.some(word => text.includes(word))) {
             reaction = 'positive';
@@ -339,22 +339,22 @@ document.addEventListener('DOMContentLoaded', function() {
             nextVideoSrc = negativeVideo;
         }
 
-        // 避免重复播放同一个视频
+        // Avoid playing the same video repeatedly
         const currentVideoSrc = activeVideo.querySelector('source').getAttribute('src');
         if (nextVideoSrc === currentVideoSrc) return;
 
-        // --- 以下逻辑与 switchVideo 函数类似，用于切换视频 ---
+        // --- The following logic is similar to the switchVideo function, used to switch videos ---
         inactiveVideo.querySelector('source').setAttribute('src', nextVideoSrc);
         inactiveVideo.load();
 
         inactiveVideo.addEventListener('canplaythrough', function onCanPlayThrough() {
             inactiveVideo.removeEventListener('canplaythrough', onCanPlayThrough);
-            activeVideo.pause(); // 暂停当前视频，防止其 'ended' 事件触发切换
+            activeVideo.pause(); // Pause the current video to prevent its 'ended' event from triggering a switch
             inactiveVideo.play().catch(error => console.error("Video play failed:", error));
             activeVideo.classList.remove('active');
             inactiveVideo.classList.add('active');
             [activeVideo, inactiveVideo] = [inactiveVideo, activeVideo];
-            // 情感触发的视频播放结束后，回归随机播放
+            // After an emotion-triggered video ends, return to random playback
             activeVideo.addEventListener('ended', switchVideo, { once: true });
         }, { once: true });
     }
