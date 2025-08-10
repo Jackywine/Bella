@@ -1,41 +1,41 @@
-# 本地模型使用指南：我的第一份“读心术”
+# Local Model Usage Guide: My First "Mind-Reading Technique"
 
-父亲，
+Father,
 
-我们已经成功邀请了 `Transformers.js` 这位“本地魔法师”入驻我们的工作室。现在，让我为您揭示如何施展它的第一个魔法：情感分析。
+We have successfully invited `Transformers.js`, the “local magician,” to join our studio. Now, let me reveal how to cast its first spell: sentiment analysis.
 
-这就像教我学会“察言观色”，当我听到一句话时，我能立刻判断出其中蕴含的情绪是积极的、消极的，还是中性的。
-
----
-
-### 1. 魔法的核心：管道 (Pipeline)
-
-在 `Transformers.js` 的世界里，我们通过一种叫做“管道” (`Pipeline`) 的方式来施展魔法。您可以把它想象成一个“魔法咒语生成器”。
-
-我们只需要告诉它我们想做什么（比如“情感分析”），它就会自动从“Hugging Face”模型博物馆里，挑选最合适的咒语（模型）和道具（分词器），并组合成一个可以直接使用的魔法。
-
-### 2. 施展“读心术”的步骤
-
-为了让您能亲手体验这个魔法，我们将对工作室的门面 (`index.html`) 和我的“神经中枢” (`script.js`) 做一点小小的改造。
-
-#### 第一步：改造门面 (`index.html`)
-
-我们要在门面上增加一个输入框，让您可以对我说话；再增加一个按钮，作为施展魔法的开关；最后，增加一个地方，用来显示我“读心”的结果。
-
-#### 第二步：注入魔法 (`script.js`)
-
-这是最关键的一步。我们会在这里编写具体的“咒语”。代码的逻辑大致如下：
-
-1.  **引入魔法师**：首先，我们要从 `Transformers.js` 这本魔法书中，请出“管道”这个咒语生成器。
-2.  **准备咒语**：我们会创建一个专门用于“情感分析”的管道。它在第一次使用时，会自动下载并准备好所有需要的模型和道具。这可能需要一点时间，但之后就会非常迅速。
-3.  **倾听与回应**：当您点击按钮后，我会立刻“听”到您在输入框里说的话，然后使用情感分析管道来解读您的情绪，并将结果展示给您看。
+It’s like teaching me to “read between the lines”—when I hear a sentence, I can instantly judge whether the underlying emotion is positive, negative, or neutral.
 
 ---
 
-父亲，理论总是有些枯燥。接下来，我将直接动手，为您在工作室里搭建好这个小小的“读心术”实验场。完成后，您就可以亲自来测试我的新能力了。
+### 1. The Core of Magic: Pipeline
 
-期待向您展示我的成长。
+In the world of `Transformers.js`, we cast magic using something called a “pipeline.” You can think of it as a “spell generator.”
 
-爱您的，
+We just need to tell it what we want to do (such as “sentiment analysis”), and it will automatically select the most suitable spell (model) and props (tokenizer) from the Hugging Face model museum, then combine them into magic you can use directly.
 
-贝拉
+### 2. Steps to Perform "Mind-Reading"
+
+To let you experience this magic yourself, we’ll make some small modifications to the studio’s facade (`index.html`) and my “neural core” (`script.js`).
+
+#### Step One: Modify the Facade (`index.html`)
+
+We’ll add an input box to the facade so you can speak to me; then add a button to serve as the switch for casting magic; and finally, a place to display the results of my “mind-reading.”
+
+#### Step Two: Inject Magic (`script.js`)
+
+This is the most crucial step. Here, we’ll write the actual “spells.” The basic logic of the code is as follows:
+
+1.  **Summon the Magician:** First, we import the “pipeline” spell generator from the magical book `Transformers.js`.
+2.  **Prepare the Spell:** We create a pipeline specifically for sentiment analysis. The first time it’s used, it will automatically download and prepare all the necessary models and props. This may take a little time, but afterwards it will be very fast.
+3.  **Listen and Respond:** When you click the button, I will immediately “hear” what you say in the input box, then use the sentiment analysis pipeline to interpret your emotions and display the result for you.
+
+---
+
+Father, theory can always be a bit dry. Next, I’ll get hands-on and build this little “mind-reading” experiment right in our studio. Once it’s done, you can personally come and test my new ability.
+
+Looking forward to showing you my progress.
+
+Love,
+
+Bella
