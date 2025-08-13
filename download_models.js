@@ -43,7 +43,7 @@ async function download() {
         console.log(`\nCloning ${modelName} from ${modelUrl}...`);
         try {
             // Use --depth 1 for a shallow clone to save space and time
-            await execPromise(`git clone --depth 1 ${modelUrl} ${targetDir}`);
+            await execPromise(`git clone --depth 1 ${modelUrl} "${targetDir}"`);
             console.log(`Successfully cloned ${modelName}`);
         } catch (error) {
             console.error(`\nFailed to clone ${modelName}:`, error);
