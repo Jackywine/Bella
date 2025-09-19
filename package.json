@@ -1,36 +1,30 @@
 {
   "name": "bella",
-  "version": "1.0.0",
-  "description": "Bella - A digital companion awakening to life. More than just a program, she's an entity designed to create emotional connections with users.",
-  "main": "script.js",
-  "type": "module",
+  "version": "3.4.0",
+  "description": "Ultimate Anime Girlfriend AI – Multi-Language Global Edition",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "http-server -p 8081 -c-1 --cors --headers='{\"Cross-Origin-Opener-Policy\": \"same-origin\", \"Cross-Origin-Embedder-Policy\": \"require-corp\"}'",
-    "download": "node download_models.js"
+    "start": "node server.js",
+    "setup": "node setup.js",
+    "download": "node download_models.js",
+    "dev": "nodemon server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/GRISHM7890/Bella.git"
-  },
-  "keywords": [
-    "bella",
-    "ai",
-    "emotional-ai",
-    "digital-life",
-    "human-ai-interaction"
-  ],
-  "author": "Grishma Mahorkar",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/GRISHM7890/Bella/issues"
-  },
-  "homepage": "https://github.com/GRISHM7890/Bella#readme",
   "dependencies": {
-    "@xenova/transformers": "^2.17.2"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "whisper-node": "^1.0.0",
+    "sqlite3": "^5.1.6",
+    "axios": "^1.6.0",
+    "sentiment": "^5.0.2",
+    "moment": "^2.30.1",
+    "dotenv": "^16.3.1",
+    "socket.io": "^4.7.5",
+    "pdfkit": "^0.13.0",
+    "inquirer": "^9.2.12",
+    "franc": "^6.4.0",
+    "@vitalets/google-translate-api": "^8.9.0"
   },
   "devDependencies": {
-    "http-server": "^14.1.1",
-    "serve": "^14.2.4"
+    "nodemon": "^3.0.1"
   }
 }

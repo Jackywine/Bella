@@ -1,64 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella - Your AI Companion</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="chatStyles.css">
-    <!-- 引入 Font Awesome 图标库，用于麦克风图标 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>Bella 3.4.0 – Ultimate Anime Girlfriend</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/models/face-api.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- 加载屏幕 -->
-    <div id="loading-screen">
-        <img src="Bellaicon/Generated image.webp" alt="Loading Bella...">
+  <div class="container">
+    <img id="bella-avatar" src="/base-bella.png" alt="Bella" style="width:200px; border-radius:50%;">
+    <div id="ar-container"></div>
+    <video id="webcam" style="display:none;"></video>
+    <span id="detected-emotion" style="display:none;">neutral</span>
+    <div id="chat" class="chat-window"></div>
+    <input id="input" type="text" placeholder="Talk to Bella in any language~ 💬">
+    <div class="controls">
+      <button id="morph-btn">Morph Bella 🎭</button>
+      <button id="export-btn">Export Chats 📄</button>
+      <label><input type="checkbox" id="date-toggle"> Date Mode 🌹</label>
+      <label><input type="checkbox" id="ar-toggle"> AR Mode 🕶️</label>
+      <div class="sliders">
+        <label>Flirty: <input type="range" id="flirty-slider" class="personality-slider" min="0" max="1" step="0.1" value="0.7"></label>
+        <label>Tsundere: <input type="range" id="tsundere-slider" class="personality-slider" min="0" max="1" step="0.1" value="0.3"></label>
+        <label>Supportive: <input type="range" id="supportive-slider" class="personality-slider" min="0" max="1" step="0.1" value="1"></label>
+      </div>
+      <div id="quest-list"></div>
+      <div class="status-bar">
+        <div id="affinity" class="affinity-bar">Bond: 0%</div>
+        <span id="emotion">💕</span>
+      </div>
     </div>
-
-    <!-- 视频背景 -->
-    <div class="video-container">
-        <video autoplay muted class="bg-video active" id="video1">
-            <source src="视频资源/3D 建模图片制作.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <video muted class="bg-video" id="video2">
-            <source src="" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-
-    <!-- 内容层，覆盖在视频之上 -->
-    <div class="content-overlay">
-
-        <!-- 语音识别结果显示区域 -->
-        <div class="transcript-container">
-            <p id="transcript"></p>
-        </div>
-
-        <!-- 底部麦克风和链接 -->
-        <footer class="bottom-bar">
-            <button class="mic-button" id="mic-button" aria-label="Start Listening">
-                <i class="fas fa-microphone"></i>
-            </button>
-        </footer>
-
-        <!-- 聊天控制面板 -->
-        <div class="chat-control-panel">
-            <button id="chat-toggle-btn" class="control-btn primary">
-                <i class="fas fa-comments"></i>
-                <span>聊天</span>
-            </button>
-            <button id="chat-test-btn" class="control-btn secondary">
-                <i class="fas fa-paper-plane"></i>
-                <span>测试</span>
-            </button>
-        </div>
-
-    </div>
-
-    <script type="module" src="core.js"></script>
-    <script type="module" src="chatInterface.js"></script>
-    <script type="module" src="script.js"></script>
+  </div>
+  <script src="main.js"></script>
 </body>
 </html>
