@@ -18,7 +18,7 @@
 ### One-Click Launch
 ```bash
 # Clone the project
-git clone https://github.com/GRISHM7890/Bella.git
+git clone https://github.com/Jackywine/Bella.git
 cd Bella
 
 # Install dependencies
