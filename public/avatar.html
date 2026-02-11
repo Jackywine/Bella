@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Avatar Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
+  <style>
+    body { margin: 0; background: #111; overflow: hidden; }
+    canvas { display: block; }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    button { margin: 5px; padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button onclick="changeClothes('clothes/dress1.glb')">Dress 1</button>
+    <button onclick="changeClothes('clothes/dress2.glb')">Dress 2</button>
+    <button onclick="changeClothes('clothes/tshirt.png')">T-Shirt</button>
+  </div>
+  <script>
+    let scene, camera, renderer, avatar, loader;
+
+    function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111111);
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 1.6, 3);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+      scene.add(light);
+
+      loader = new THREE.GLTFLoader();
+      loader.load('avatar.glb', (gltf) => {
+        avatar = gltf.scene;
+        avatar.scale.set(1.5, 1.5, 1.5);
+        scene.add(avatar);
+      });
+
+      animate();
+    }
+
+    function changeClothes(path) {
+      if (!avatar) return;
+
+      if (path.endsWith(".glb")) {
+        loader.load(path, (gltf) => {
+          let cloth = gltf.scene;
+          cloth.scale.set(1.5, 1.5, 1.5);
+          cloth.position.set(0,0,0);
+          avatar.add(cloth);
+        });
+      } else if (path.endsWith(".png")) {
+        const texLoader = new THREE.TextureLoader();
+        texLoader.load(path, (texture) => {
+          avatar.traverse((child) => {
+            if (child.isMesh) {
+              child.material.map = texture;
+              child.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (avatar) avatar.rotation.y += 0.005;
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    init();
+  </script>
+</body>
+</html>

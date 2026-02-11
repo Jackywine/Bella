@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>Kaaya Realtime</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+</head>
+<body>
+  <h2>🎙️ Real-time Conversation with Kaaya</h2>
+  <video id="video" width="320" height="240" autoplay muted></video>
+  <div id="emotion">भावना: Detecting...</div>
+  <button id="startBtn">बोलना शुरू करें</button>
+  <div id="chat"></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const emotionDiv = document.getElementById('emotion');
+    const chatDiv = document.getElementById('chat');
+    const startBtn = document.getElementById('startBtn');
+
+    let currentEmotion = "Neutral";
+
+    // Camera start
+    Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+      faceapi.nets.faceExpressionNet.loadFromUri('/models')
+    ]).then(startVideo);
+
+    function startVideo() {
+      navigator.mediaDevices.getUserMedia({ video: {} })
+        .then(stream => { video.srcObject = stream })
+        .catch(err => console.error(err));
+    }
+
+    video.addEventListener('play', () => {
+      const canvas = faceapi.createCanvasFromMedia(video);
+      document.body.append(canvas);
+      const displaySize = { width: video.width, height: video.height };
+      faceapi.matchDimensions(canvas, displaySize);
+
+      setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceExpressions();
+        if (detections.length > 0) {
+          currentEmotion = Object.entries(detections[0].expressions)
+            .sort((a, b) => b[1] - a[1])[0][0];
+          emotionDiv.textContent = "भावना: " + currentEmotion;
+        }
+      }, 200);
+    });
+
+    // Speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "hi-IN";
+    recognition.interimResults = false;
+
+    startBtn.addEventListener('click', () => {
+      recognition.start();
+    });
+
+    recognition.onresult = async (event) => {
+      const userText = event.results[0][0].transcript;
+      addChat("🧑: " + userText);
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: userText, emotion: currentEmotion })
+      });
+      const data = await res.json();
+
+      addChat("🤖: " + data.reply);
+      speak(data.reply);
+    };
+
+    function addChat(text) {
+      const p = document.createElement("p");
+      p.textContent = text;
+      chatDiv.appendChild(p);
+    }
+
+    // Text-to-Speech
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "hi-IN";
+      speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
